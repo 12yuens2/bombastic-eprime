@@ -1,0 +1,107 @@
+language ESSENCE' 1.0
+
+$$$$ Parameters $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+$ grid has r rows, c columns
+$
+$ c1 c2 c3 c4
+$ 0 0 0 0 0 0 r1
+$ 0 2 2 1 2 0 r2
+$ 0 1 1 2 2 0 r3
+$ 0 2 0 2 2 0 r4
+$ 0 0 0 0 0 0 r5
+$
+$ 0: dead, 1: ice, 2: normal
+$ We assume that every grid is surrounded by dead cells
+given gridInit : matrix indexed by [int(1..r), int(1..c)] of int(0..2)
+
+$ Initial positions of avatar and blocks
+$ Doing it like this to check c, r compliance.
+given avatarInitRow : int(1..r)
+given avatarInitCol : int(1..c)
+
+given numBlocks : int 
+given blocksInitRow : matrix indexed by [int(1..numBlocks)] of int(1..r)
+given blocksInitCol : matrix indexed by [int(1..numBlocks)] of int(1..c)
+
+$ Goal positions of blocks
+given blocksGoalRow : matrix indexed by [int(1..numBlocks)] of int(1..r)
+given blocksGoalCol : matrix indexed by [int(1..numBlocks)] of int(1..c)
+
+$ Number of steps
+given steps : int(1..)
+$$$$ End of Parameters $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+$$$$ Decision Variables $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+$ Decompose into row/col to control domain bounds separately/easily
+find moveRow : matrix indexed by [int(1..steps)] of int(-1..1)
+find moveCol : matrix indexed by [int(1..steps)] of int(-1..1)
+
+$ State variables. Convention is that 0 is initial position,
+$ so i is state _after_ move in step i.
+find avatarCurrentRow : matrix indexed by [int(0..steps)] of int(1..r)
+find avatarCurrentCol : matrix indexed by [int(0..steps)] of int(1..c)
+find blocksCurrentRow : 
+  matrix indexed by [int(0..steps), int(1..numBlocks)] of int(1..r)
+find blocksCurrentCol :
+  matrix indexed by [int(0..steps), int(1..numBlocks)] of int(1..c)
+find gridCurrent : 
+  matrix indexed by [int(0..steps), int(1..r), int(1..c)] of int(0..2)
+
+$$$$ End of Decision Variables $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+such that
+
+$ Avatar current row/col cannot be on dead cells
+forall row : int(1..r) .
+    forall col : int(1..c) .
+        forall step : int(0..steps) .
+	    gridInit[row,col] = 0 -> avatarCurrentRow[step] != row /\
+	    		       	     avatarCurrentCol[step] != col,
+
+$ Block current row/col cannot be on dead cells
+forall row : int(1..r) .
+    forall col : int(1..c) .
+        forall step : int(0..steps) .
+	    forall block : int(1..numBlocks) .
+	        gridInit[row,col] = 0 -> blocksCurrentRow[step,block] != row /\
+				      	 blocksCurrentCol[step,block] != col,
+
+
+$ Blocks cannot share same cell				       
+forall step : int(0..steps) .
+    forall checkBlock : int(1..numBlocks) .
+       forall otherBlock : int(1..numBlocks) .
+           checkBlock != otherBlock ->
+	       blocksCurrentRow[step,checkBlock] != blocksCurrentRow[step,otherBlock] /\
+	       blocksCurrentCol[step,checkBlock] != blocksCurrentRow[step,otherBlock],
+
+
+
+$ Blocks and avatar cannot share same cell
+forall step : int(0..steps) .
+    forall block : int(1..numBlocks) .
+        avatarCurrentRow[step] != blocksCurrentRow[step,block] /\
+	avatarCurrentCol[step] != blocksCurrentCol[step,block],
+
+
+
+$ All goals have block in them
+forall goal : int(1..numBlocks) .
+    exists block : int (1..numBlocks) . 
+        blocksGoalRow[goal] = blocksCurrentRow[steps,block] /\
+	blocksGoalCol[goal] = blocksCurrentCol[steps,block],
+
+
+
+$ If block has moved, avatar must have moved into block's previous location
+forall step : int(1..steps) .
+    forall block : int(1..numBlocks) .
+        blocksCurrentRow[step-1,block] != blocksCurrentRow[step,block] \/
+	blocksCurrentCol[step-1,block] != blocksCurrentRow[step,block] -> $ block has moved
+	    avatarCurrentRow[step] = blocksCurrentRow[step-1,block] /\
+	    avatarCurrentCol[step] = blocksCurrentCol[step-1,block]
+
+
+$ Avatar may move horizontally
+
