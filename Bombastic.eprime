@@ -100,8 +100,59 @@ forall step : int(1..steps) .
         blocksCurrentRow[step-1,block] != blocksCurrentRow[step,block] \/
 	blocksCurrentCol[step-1,block] != blocksCurrentRow[step,block] -> $ block has moved
 	    avatarCurrentRow[step] = blocksCurrentRow[step-1,block] /\
-	    avatarCurrentCol[step] = blocksCurrentCol[step-1,block]
+	    avatarCurrentCol[step] = blocksCurrentCol[step-1,block],
 
 
-$ Avatar may move horizontally
+$ If avatar moved into block, block move same direction
+forall step : int(1..steps) .
+    forall block : int(1..numBlocks) .
+        avatarCurrentRow[step] = blocksCurrentRow[step-1,block] ->
+	blocksCurrentRow[step,block] = blocksCurrentRow[step-1,block] + moveRow[step],
 
+forall step : int(1..steps) .
+    forall block : int(1..numBlocks) .
+        avatarCurrentCol[step] = blocksCurrentCol[step-1,block] ->
+	blocksCurrentCol[step,block] = blocksCurrentCol[step-1,block] + moveCol[step],
+
+$ Update moveRow/moveCol for avatar movement
+forall step : int(1..steps) .
+    avatarCurrentRow[step-1] < avatarCurrentRow[step] -> moveRow[step] = 1,
+
+forall step : int(1..steps) .
+    avatarCurrentRow[step-1] > avatarCurrentRow[step] -> moveRow[step] = -1,
+
+forall step : int(1..steps) .
+    avatarCurrentRow[step-1] = avatarCurrentRow[step] -> moveRow[step] = 0,
+
+forall step : int(1..steps) .
+    avatarCurrentCol[step-1] < avatarCurrentCol[step] -> moveCol[step] = 1,
+
+forall step : int(1..steps) .
+    avatarCurrentCol[step-1] > avatarCurrentCol[step] -> moveCol[step] = -1,
+
+forall step : int(1..steps) .
+    avatarCurrentCol[step-1] = avatarCurrentCol[step] -> moveCol[step] = 0,
+
+
+$ Avatar movement is only one block each step
+forall step : int(1..steps) .
+    | avatarCurrentRow[step-1] - avatarCurrentRow[step] | <= 1 /\
+    | avatarCurrentCol[step-1] - avatarCurrentCol[step] | <= 1,
+
+
+$ Avatar no diagonal movement
+forall step : int(1..steps) .
+    avatarCurrentRow[step-1] != avatarCurrentRow[step] ->
+    avatarCurrentCol[step-1] = avatarCurrentCol[step],
+        
+forall step : int(1..steps) .
+    avatarCurrentCol[step-1] != avatarCurrentCol[step] ->
+    avatarCurrentRow[step-1] = avatarCurrentRow[step],
+
+
+
+$ Cells don't change TODO ice
+forall step : int(0..steps) .
+    forall row : int(1..r) .
+        forall col : int(1..c) .
+	    gridCurrent[step,row,col] = gridInit[row,col]
