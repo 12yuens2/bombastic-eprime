@@ -65,13 +65,19 @@ forall row : int(1..r) .
         gridCurrent[0,row,col] = gridInit[row,col],
 
 
+$ All goals have blocks in them
+forall goal : int(1..numBlocks) .
+    exists block : int (1..numBlocks) . 
+        blocksCurrentRow[steps,block] = blocksGoalRow[goal] /\
+	blocksCurrentCol[steps,block] = blocksGoalCol[goal],
+
+
 $ Avatar current row/col cannot be on dead cells
 forall step : int(0..steps) .
     forall row : int(1..r) .
         forall col : int(1..c) .
 	    gridCurrent[step,row,col] = 0 -> avatarCurrentRow[step] != row \/ 
 	    		       	      	     avatarCurrentCol[step] != col,
-
 
 $ Blocks and avatar cannot share same cell
 forall step : int(0..steps) .
@@ -86,15 +92,6 @@ forall step : int(1..steps) .
     | avatarCurrentCol[step-1] - avatarCurrentCol[step] | <= 1,
 
 
-$ Blocks cannot share same cell				       
-forall step : int(0..steps) .
-    forall checkBlock : int(1..numBlocks) .
-       forall otherBlock : int(1..numBlocks) .
-           checkBlock != otherBlock ->
-	       blocksCurrentRow[step,checkBlock] != blocksCurrentRow[step,otherBlock] /\
-	       blocksCurrentCol[step,checkBlock] != blocksCurrentRow[step,otherBlock],
-
-
 $ Block cannot be on dead cells
 forall step : int(0..steps) .
     forall block : int(1..numBlocks) .
@@ -102,6 +99,14 @@ forall step : int(0..steps) .
 	    forall col : int(1..c) .
 	        gridCurrent[step,row,col] = 0 -> blocksCurrentRow[step,block] != row \/
 					      	 blocksCurrentCol[step,block] != col,
+
+$ Blocks cannot share same cell				       
+forall step : int(0..steps) .
+    forall checkBlock : int(1..numBlocks) .
+       forall otherBlock : int(1..numBlocks) .
+           checkBlock != otherBlock ->
+	       blocksCurrentRow[step,checkBlock] != blocksCurrentRow[step,otherBlock] \/
+	       blocksCurrentCol[step,checkBlock] != blocksCurrentCol[step,otherBlock],
 
 
 $ If block has moved, avatar must have moved into block's previous location
@@ -151,13 +156,6 @@ forall step : int(1..steps) .
     avatarCurrentCol[step-1] != avatarCurrentCol[step] ->
     avatarCurrentRow[step-1] = avatarCurrentRow[step],
 
-
-
-$ All goals have blocks in them
-forall goal : int(1..numBlocks) .
-    exists block : int (1..numBlocks) . 
-        blocksCurrentRow[steps,block] = blocksGoalRow[goal] /\
-	blocksCurrentCol[steps,block] = blocksGoalCol[goal],
 
 $ TODO ice
 forall step : int(1..steps) .
