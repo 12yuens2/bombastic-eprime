@@ -65,19 +65,13 @@ forall row : int(1..r) .
         gridCurrent[0,row,col] = gridInit[row,col],
 
 
-$ All goals have blocks in them
-forall goal : int(1..numBlocks) .
-    exists block : int (1..numBlocks) . 
-        blocksCurrentRow[steps,block] = blocksGoalRow[goal] /\
-	blocksCurrentCol[steps,block] = blocksGoalCol[goal],
-
-
 $ Avatar current row/col cannot be on dead cells
 forall step : int(0..steps) .
     forall row : int(1..r) .
         forall col : int(1..c) .
 	    gridCurrent[step,row,col] = 0 -> avatarCurrentRow[step] != row \/ 
 	    		       	      	     avatarCurrentCol[step] != col,
+
 
 $ Blocks and avatar cannot share same cell
 forall step : int(0..steps) .
@@ -91,6 +85,10 @@ forall step : int(1..steps) .
     | avatarCurrentRow[step-1] - avatarCurrentRow[step] | <= 1 /\
     | avatarCurrentCol[step-1] - avatarCurrentCol[step] | <= 1,
 
+
+$ Diagonal movement
+forall step : int(1..steps) .
+    | moveRow[step] + moveCol[step] | = 1,
 
 $ Block cannot be on dead cells
 forall step : int(0..steps) .
@@ -157,11 +155,20 @@ forall step : int(1..steps) .
     avatarCurrentRow[step-1] = avatarCurrentRow[step],
 
 
-$ TODO ice
+
+$ All goals have blocks in them
+forall goal : int(1..numBlocks) .
+    exists block : int(1..numBlocks) . 
+        blocksCurrentRow[steps,block] = blocksGoalRow[goal] /\
+	blocksCurrentCol[steps,block] = blocksGoalCol[goal],
+
+
+$ Grid 0 and 2s always stay the same
 forall step : int(1..steps) .
     forall row : int(1..r) .
         forall col : int(1..c) .
-	    gridCurrent[step-1,row,col] != 1 -> gridCurrent[step,row,col] = gridCurrent[step-1,row,col],
+	    gridCurrent[step-1,row,col] != 1 ->
+	        gridCurrent[step,row,col] = gridCurrent[step-1,row,col],
 
 $ Ice
 forall step : int(1..steps) .
@@ -172,6 +179,17 @@ forall step : int(1..steps) .
 	    gridCurrent[step-1,row,col] = 1 /\ $avatar on ice
 	    (avatarCurrentRow[step] != row \/ avatarCurrentCol[step] != col) -> $moved off ice
 	        gridCurrent[step,row,col] = 0,
+            
+
+$Ice not stepped on doesn't change
+forall step : int(1..steps) .
+    forall row : int(1..r) .
+        forall col : int(1..c) .
+	    gridCurrent[step-1,row,col] = 1 /\
+	    avatarCurrentRow[step-1] != row /\
+	    avatarCurrentCol[step-1] != col ->
+	        gridCurrent[step,row,col] = 1,
+	
 
 $ Broken ice stays broken
 forall step : int(0..steps) .
