@@ -74,16 +74,16 @@ forall step : int(0..steps) .
 
 
 $ Blocks and avatar cannot share same cell
-$forall step : int(0..steps) .
-$    forall block : int(1..numBlocks) .
-$        avatarCurrentRow[step] != blocksCurrentRow[step,block] \/
-$	avatarCurrentCol[step] != blocksCurrentCol[step,block],
+forall step : int(0..steps) .
+    forall block : int(1..numBlocks) .
+        avatarCurrentRow[step] != blocksCurrentRow[step,block] \/
+	avatarCurrentCol[step] != blocksCurrentCol[step,block],
 
 
 $ Avatar movement is only one block each step
-$forall step : int(1..steps) .
-$    | avatarCurrentRow[step-1] - avatarCurrentRow[step] | <= 1 /\
-$    | avatarCurrentCol[step-1] - avatarCurrentCol[step] | <= 1,
+forall step : int(1..steps) .
+    | avatarCurrentRow[step-1] - avatarCurrentRow[step] | <= 1 /\
+    | avatarCurrentCol[step-1] - avatarCurrentCol[step] | <= 1,
 
 
 $ Diagonal movement not allowed
