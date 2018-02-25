@@ -1,29 +1,65 @@
 import os
 import subprocess
+from gathering import *
 
-
-
-def run_savilerow(param_file, optimisation="-O2"):
-    subprocess.run(["../../savilerow", "../Bombastic.eprime", "../params/" + param_file, "-run-solver", "-out-minion", param_file+".minion", "-out-solution", param_file+".solution", "-out-info", param_file+".info", optimisation])
 
 # Run all params
+data_time = {}
+data_nodes = {}
 
-param_times = {}
+# Clean up old info files
+subprocess.run(["sh", "clean.sh"])
 
-for param_file in os.listdir("../params"):
-    
-    run_savilerow(param_file)
 
-    with open(param_file+".info") as info_file:
-        solver_time = info_file.readline().strip()
-        param_times[param_file] = float(solver_time.split(":")[1])
 
-for key in sorted(param_times):
-    print(key + ": " + str(param_times[key]))
+print("Gather data")
 
-    
+i = 0
+optimisations = ["-O0", "-O1", "-O2", "-O3"]
+for opt_flag in optimisations:
+    param_times = {}
+
+    times, nodes = get_data(opt_flag)
+
+    data_time[opt_flag] = times
+    data_nodes[opt_flag] = nodes
+   
 
 # Read info files to get time taken
 
-
 # Save data to file
+print_data(data_time, data_nodes)
+
+'''
+print("Time data")
+for opt,data in data_time.items():
+    print(opt)
+    i = 0
+    for param, time in zip(get_param_list(), data):
+        if i % 2 == 0:
+            print("(" + str(i) + "," + str(time) + ")", end=" ")
+        i += 1
+        
+    i = 0
+    for param, time in zip(get_param_list(), data):
+        if i % 2 != 0:
+            print("(" + str(i) + "," + str(time) + ")", end=" ")
+        i += 1
+
+
+print("Node data")
+for opt,data in data_nodes.items():
+    print(opt)
+    i = 0
+    for param, time in zip(get_param_list(), data):
+        if i % 2 == 0:
+            print("(" + str(i) + "," + str(time) + ")", end=" ")
+        i += 1
+        
+    i = 0
+    for param, time in zip(get_param_list(), data):
+        if i % 2 != 0:
+            print("(" + str(i) + "," + str(time) + ")", end=" ")
+        i += 1
+'''
+
