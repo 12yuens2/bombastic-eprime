@@ -81,12 +81,13 @@ forall step : int(0..steps) .
 
 
 $ Avatar movement is only one block each step
-forall step : int(1..steps) .
-    | avatarCurrentRow[step-1] - avatarCurrentRow[step] | <= 1 /\
-    | avatarCurrentCol[step-1] - avatarCurrentCol[step] | <= 1,
+$forall step : int(1..steps) .
+$    | avatarCurrentRow[step-1] - avatarCurrentRow[step] | <= 1 /\
+$    | avatarCurrentCol[step-1] - avatarCurrentCol[step] | <= 1,
 
 
 $ Diagonal movement not allowed
+$ Increases time and solver nodes if not used
 forall step : int(1..steps) .
     | moveRow[step] | + | moveCol[step] | = 1,
 
@@ -100,11 +101,11 @@ forall step : int(0..steps) .
 
 $ Blocks cannot share same cell				       
 forall step : int(0..steps) .
-    forall block : int(1..numBlocks) .
-       forall otherBlock : int(block + 1..numBlocks) .
-	   blocksCurrentRow[step,block] != blocksCurrentRow[step,otherBlock] \/
-	   blocksCurrentCol[step,block] != blocksCurrentCol[step,otherBlock],
-
+    forall checkBlock : int(1..numBlocks) .
+        forall otherBlock : int(1..numBlocks) .
+	    checkBlock != otherBlock ->
+	        blocksCurrentRow[step, checkBlock] != blocksCurrentRow[step, otherBlock] \/
+		blocksCurrentCol[step, checkBlock] != blocksCurrentCol[step, otherBlock],
 
 $ If block has moved, avatar must have moved into block's previous location
 forall step : int(1..steps) .
@@ -117,7 +118,7 @@ forall step : int(1..steps) .
 $ Don't move block if avatar does not step into it
 forall step : int(1..steps) .
     forall block : int(1..numBlocks) .
-        avatarCurrentRow[step] != blocksCurrentRow[step-1,block] \/
+       avatarCurrentRow[step] != blocksCurrentRow[step-1,block] \/
 	avatarCurrentCol[step] != blocksCurrentCol[step-1,block] ->
 	    blocksCurrentRow[step,block] = blocksCurrentRow[step-1,block] /\
 	    blocksCurrentCol[step,block] = blocksCurrentCol[step-1,block],
@@ -170,7 +171,6 @@ forall step : int(1..steps) .
 	    avatarCurrentCol[step-1] = col /\
 	    gridCurrent[step-1,row,col] = 1 -> $avatar on ice
 	        gridCurrent[step,row,col] = 0,
-            
 
 $Ice not stepped on doesn't change
 forall step : int(1..steps) .
@@ -181,7 +181,6 @@ forall step : int(1..steps) .
 	     avatarCurrentCol[step-1] != col) ->
 	        gridCurrent[step,row,col] = 1,
 	
-
 $ Broken ice stays broken
 forall step : int(0..steps) .
     forall row : int(1..r) .
