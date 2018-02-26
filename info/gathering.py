@@ -48,12 +48,13 @@ def print_data_dict(data_dict):
         print("\n" + str(opt))
         i = 1
         for param, time in zip(get_param_list(), data):
-            if i % 2 == 0:
-                print("(" + str(i) + "," + str(time) + ")", end=" ")
+            print("(" + str(i) + "," + str(time) + ")", end=" ")
             i += 1
 
+        '''
         i = 1
         for param, time in zip(get_param_list(), data):
             if i % 2 != 0:
                 print("(" + str(i) + "," + str(time) + ")", end=" ")
             i += 1
+        '''

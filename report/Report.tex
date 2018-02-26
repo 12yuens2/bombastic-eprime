@@ -221,6 +221,95 @@ Next are the constraints for invalid states of the game. This restricts the mode
 
 \subsection{Optimisations}
 
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.55]
+\begin{axis}[
+	title={Time taken with optimisation flags for files with solutions},
+	ylabel={Time taken in seconds},
+	ymode=log,
+	xlabel={Parameter file},
+	x label style={yshift=-0.5cm},
+	xtick={1,3,5,7,9,11,13,15,17},
+	xticklabels={1_1, 2_3, 3_6, 4_8, 5_10, 6_12, 7_15, 8_16, 9_17},
+	x tick label style={rotate=90, anchor=east},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+	cycle list name=color list,
+	]
+
+\addplot+[mark=*] coordinates {
+(1,0.035223) (3,0.036899) (5,0.052072) (7,0.078475) (9,0.116289)  (11,1.84815) (13,5.51514) (15,38.3426) (17,69.4381)};
+\label{plot:solution-time-o0}
+\addlegendentry{-O0}
+
+\addplot+[mark=*] coordinates {
+(1,0.034333) (3,0.034264) (5,0.043055) (7,0.056849) (9,0.076326) (11,0.540213) (13,2.86617) (15,20.646) (17,36.5562)};
+\label{plot:solution-time-o1}
+\addlegendentry{-O1}
+
+\addplot+[mark=*] coordinates {
+(1,0.03579) (3,0.033948) (5,0.036258) (7,0.039734)  (9,0.04724) (11,0.253274) (13,1.32907) (15,10.1803) (17,17.8404)};
+\label{plot:solution-time-o2}
+\addlegendentry{-O2}
+
+\addplot+[mark=*] coordinates {
+(1,0.033733) (3,0.032494) (5,0.036544) (7,0.035154) (9,0.046558) (11,0.241136) (13,1.31382) (15,10.9081) (17,19.524)};
+\label{plot:solution-time-o3}
+\addlegendentry{-O3}
+
+\end{axis}
+
+\end{tikzpicture}
+\end{minipage}
+%
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.55]
+\begin{axis}[
+	title={Time taken with optimisation flags for files with no solutions},
+	ylabel={Time taken in seconds},
+	ymode=log,
+	xlabel={Parameter file},
+	x label style={yshift=-0.5cm},
+	xtick={2,4,6,8,10,12,14,16},
+	xticklabels={2_2,3_5,4_7,5_9,6_11,7_14,8_15,9_16,},
+	x tick label style={rotate=90, anchor=east},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+	cycle list name=color list,
+	]
+
+\addplot+[mark=*] coordinates {
+(2,0.002846) (4,0.008816) (6,0.034589) (8,0.054971) (10,0.810697) (12,2.54487) (14,14.6933) (16,25.05)
+};
+\label{plot:nosolution-time-o0}
+\addlegendentry{-O0}
+
+\addplot+[mark=*] coordinates {
+(2,0.000901) (4,0.003031) (6,0.007449) (8,0.030545) (10,0.240701) (12,1.37918) (14,7.7214) (16,12.7517)};
+\label{plot:nosolution-time-o1}
+\addlegendentry{-O1}
+
+\addplot+[mark=*] coordinates {
+(2,0.0) (4,0.000856) (6,0.000187) (8,0.00679) (10,0.105492) (12,0.602787) (14,3.88155) (16,6.23734)};
+\label{plot:nosolution-time-o2}
+\addlegendentry{-O2}
+
+\addplot+[mark=*] coordinates {
+(2,0.000267) (4,0.000909) (6,0.001539) (8,0.006925) (10,0.101873) (12,0.645699) (14,4.16704) (16,6.9618)};
+\label{plot:nosolution-time-o3}
+\addlegendentry{-O3}
+
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+\caption{Results with different optimisation flags}
+\end{figure}
+
+
 \subsection{Heuristics}
 
 \begin{figure}[H]
@@ -228,7 +317,7 @@ Next are the constraints for invalid states of the game. This restricts the mode
 \begin{minipage}{0.4\textwidth}
 \begin{tikzpicture}[scale=0.6]
 \begin{axis}[
-	title={Solver nodes with sdf heuristic},
+	title={\texttt{sdf} heuristic},
 	ylabel={Number of solver nodes},
 	ymode=log,
 	xlabel={Parameter file},
@@ -241,11 +330,11 @@ Next are the constraints for invalid states of the game. This restricts the mode
 	legend pos=north west,
 	]
 
-\addplot[color=blue, mark=*,] coordinates { (2,0) (4,0) (6,229) (8,2184) (10,8579) (12,84300) (14,507126) (16,844406) (1,1) (3,1) (5,21) (7,668) (9,4688) (11,19720) (13,183603) (15,1230659) (17,2055840)};
+\addplot[color=blue, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,21) (6,229) (7,668) (8,2184) (9,4688) (10,8579) (11,19720) (12,84300) (13,183603) (14,507126) (15,1230659) (16,844406) (17,2055840)};
 \label{plot:sdf-o0}
 \addlegendentry{O0 optimisation}
 
-\addplot[color=red, mark=*,] coordinates { (2,0) (4,0) (6,0) (8,163) (10,1994) (12,73418) (14,502477) (16,841628) (1,1) (3,1) (5,19) (7,38) (9,243) (11,5021) (13,162024) (15,1239351) (17,2077990)};
+\addplot[color=red, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,19) (6,0) (7,38) (8,163) (9,243) (10,1994) (11,5021) (12,73418) (13,162024) (14,502477) (15,1239351) (16,841628) (17,2077990)};
 \label{plot:sdf-o3}
 \addlegendentry{O3 optimisation}
 
@@ -256,7 +345,7 @@ Next are the constraints for invalid states of the game. This restricts the mode
 \begin{minipage}{0.4\textwidth}
 \begin{tikzpicture}[scale=0.6]
 \begin{axis}[
-	title={Solver nodes with static heuristic},
+	title={\texttt{static} heuristic},
 	ylabel={Number of solver nodes},
 	ymode=log,
 	xlabel={Parameter file},
@@ -275,6 +364,62 @@ Next are the constraints for invalid states of the game. This restricts the mode
 
 \addplot[color=red, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,19) (6,0) (7,18) (8,267) (9,615) (10,6622) (11,12838) (12,44769) (13,82920) (14,328133) (15,730243) (16,547164) (17,1295303) };
 \label{plot:static-o3}
+\addlegendentry{O3 optimisation}
+
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+\n
+\begin{minipage}{0.4\textwidth}
+\begin{tikzpicture}[scale=0.6]
+\begin{axis}[
+	title={\texttt{conflict} heuristic},
+	ylabel={Number of solver nodes},
+	ymode=log,
+	xlabel={Parameter file},
+	x label style={yshift=-0.5cm},
+	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
+	xticklabels={1_1, 2_2, 2_3, 3_5, 3_6, 4_7, 4_8, 5_9, 5_10, 6_11, 6_12, 7_14, 7_15, 8_15, 8_16, 9_16, 9_17},
+	x tick label style={rotate=90, anchor=east},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+]
+
+\addplot[color=blue, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,20) (6,130) (7,344) (8,427) (9,780) (10,7417) (11,11686) (12,56819) (13,84540) (14,459939) (15,821932) (16,756356) (17,1575077)};
+\label{plot:srf-o0}
+\addlegendentry{O0 optimisation}
+
+\addplot[color=red, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,19) (6,0) (7,36) (8,379) (9,327) (10,5520) (11,8760) (12,52563) (13,83408) (14,452072) (15,814969) (16,767724) (17,1163210) };
+\label{plot:srf-o3}
+\addlegendentry{O3 optimisation}
+
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+%
+\begin{minipage}{0.4\textwidth}
+\begin{tikzpicture}[scale=0.6]
+\begin{axis}[
+	title={\texttt{srf} heuristic},
+	ylabel={Number of solver nodes},
+	ymode=log,
+	xlabel={Parameter file},
+	x label style={yshift=-0.5cm},
+	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
+	xticklabels={1_1, 2_2, 2_3, 3_5, 3_6, 4_7, 4_8, 5_9, 5_10, 6_11, 6_12, 7_14, 7_15, 8_15, 8_16, 9_16, 9_17},
+	x tick label style={rotate=90, anchor=east},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+]
+
+\addplot[color=blue, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,11) (6,239) (7,385) (8,3864) (9,8240) (10,11543) (11,25800) (12,41280) (13,92541) (14,294335) (15,750655) (16,492809) (17,1259049) };
+\label{plot:srf-o0}
+\addlegendentry{O0 optimisation}
+
+\addplot[color=red, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,19) (6,0) (7,19) (8,322) (9,529) (10,17229) (11,46027) (12,50859) (13,114193) (14,265018) (15,593370) (16,445932) (17,1051399) };
+\label{plot:srf-o3}
 \addlegendentry{O3 optimisation}
 
 \end{axis}

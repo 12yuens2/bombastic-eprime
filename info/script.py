@@ -30,36 +30,3 @@ for opt_flag in optimisations:
 # Save data to file
 print_data(data_time, data_nodes)
 
-'''
-print("Time data")
-for opt,data in data_time.items():
-    print(opt)
-    i = 0
-    for param, time in zip(get_param_list(), data):
-        if i % 2 == 0:
-            print("(" + str(i) + "," + str(time) + ")", end=" ")
-        i += 1
-        
-    i = 0
-    for param, time in zip(get_param_list(), data):
-        if i % 2 != 0:
-            print("(" + str(i) + "," + str(time) + ")", end=" ")
-        i += 1
-
-
-print("Node data")
-for opt,data in data_nodes.items():
-    print(opt)
-    i = 0
-    for param, time in zip(get_param_list(), data):
-        if i % 2 == 0:
-            print("(" + str(i) + "," + str(time) + ")", end=" ")
-        i += 1
-        
-    i = 0
-    for param, time in zip(get_param_list(), data):
-        if i % 2 != 0:
-            print("(" + str(i) + "," + str(time) + ")", end=" ")
-        i += 1
-'''
-
