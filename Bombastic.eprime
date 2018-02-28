@@ -50,7 +50,7 @@ find gridCurrent :
 
 $$$$ End of Decision Variables $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-heuristic sdf
+$heuristic srf
 
 such that
 
@@ -71,6 +71,19 @@ $ Initial cells of grid
 forall row : int(1..r) .
     forall col : int(1..c) .
         gridCurrent[0,row,col] = gridInit[row,col],
+
+
+
+$$$$
+$ Goal state
+$$$$
+
+$ All blocks are in a goal
+forall block : int(1..numBlocks) .
+    exists goal : int(1..numBlocks) . 
+        blocksCurrentRow[steps,block] = blocksGoalRow[goal] /\
+	blocksCurrentCol[steps,block] = blocksGoalCol[goal],
+
 
 
 $$$$
@@ -113,10 +126,6 @@ $    | avatarCurrentRow[step-1] - avatarCurrentRow[step] | <= 1 /\
 $    | avatarCurrentCol[step-1] - avatarCurrentCol[step] | <= 1,
 
 
-$ Diagonal movement not allowed
-$ Increases time and solver nodes if not used
-forall step : int(1..steps) .
-    | moveRow[step] | + | moveCol[step] | = 1,
 
 
 $$$$
@@ -155,21 +164,18 @@ forall step : int(1..steps) .
        moveCol[step] = avatarCurrentCol[step] - avatarCurrentCol[step-1],
 
 $ Avatar no diagonal movement
-forall step : int(1..steps) .
-    avatarCurrentRow[step-1] != avatarCurrentRow[step] ->
-    avatarCurrentCol[step-1] = avatarCurrentCol[step],
+$forall step : int(1..steps) .
+$    avatarCurrentRow[step-1] != avatarCurrentRow[step] ->
+$    avatarCurrentCol[step-1] = avatarCurrentCol[step],
         
+$forall step : int(1..steps) .
+$    avatarCurrentCol[step-1] != avatarCurrentCol[step] ->
+$    avatarCurrentRow[step-1] = avatarCurrentRow[step],
+
+$ Diagonal movement not allowed and must move each turn
+$ Increases time and solver nodes if not used
 forall step : int(1..steps) .
-    avatarCurrentCol[step-1] != avatarCurrentCol[step] ->
-    avatarCurrentRow[step-1] = avatarCurrentRow[step],
-
-
-
-$ All goals have blocks in them
-forall block : int(1..numBlocks) .
-    exists goal : int(1..numBlocks) . 
-        blocksCurrentRow[steps,block] = blocksGoalRow[goal] /\
-	blocksCurrentCol[steps,block] = blocksGoalCol[goal],
+    | moveRow[step] | + | moveCol[step] | = 1,
 
 
 $ Grid 0 and 2s always stay the same
