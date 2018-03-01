@@ -40,10 +40,10 @@
 \lstset{
   language={eprime},
   frame=tb,
-  alsoletter={\\}.:+\=-<>{/},
+  alsoletter={\\}!.:+\=-<>{/}{..},
   emph = [1]{int, bool, matrix, domain},
   emphstyle = [1]{\color{variables}},
-  emph = [2]{:, \=, +, -, ., .., *, \%, /\\, \\/, <, >, =},
+  emph = [2]{:, !=, ->, \=, +, -, ., .., *, \%, /\\, \\/, <, >, =},
   emphstyle = [2]{\color{symbolred}},  
   numbers=left,
   stepnumber=1,
@@ -118,13 +118,16 @@
 
 
 \section{Introduction}
-
+Bombastic is a Capcom video game which involves pushing dice on a grid into certain configurations. In this practical we take an abstraction of this game, modelling it in Essence Prime using the Savile Row tool and writing constraints to the problem. 
+\n
+The model and constraints are then run against a set of parameter files with different processing options in Savile Row to evaluate the performance of the model and explore the effects of heuristics and optimisations of the tool. 
 \section{Design and Implementation}
+An initial model was created to pass all tests from the given parameter files with little thought for efficiency. Afterwards, small changes were made to try and optimise the model and improve the time taken and reduce the number of solver nodes to search.
 \subsection{Initial model}
 \subsubsection{Initial and goal states}
 There are three sets of state variables that need to be set up as the initial states: the avatar's position, the locations of the blocks and the cells of the grid. 
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Constraints for setting initial state variables}, captionpos=b]
 $ Avatar's initial position
 avatarCurrentRow[0] = avatarInitRow,
 avatarCurrentCol[0] = avatarInitCol,
@@ -139,8 +142,9 @@ forall row : int(1..r) .
     forall col : int(1..c) .
         gridCurrent[0,row,col] = gridInit[row,col],
 \end{lstlisting}
-This sets all ``current" decision variables for step 0 based on the given ``init" parameter variables. All further constraints will be based on these ``current" matrices and their values. Next is the constraint for the goal state.
-\begin{lstlisting}
+This sets all \texttt{current} decision variables for step 0 based on the given \texttt{init} parameter variables. All further constraints will be based on these \texttt{current} matrices and their values. Next is the constraint for the goal state.
+\begin{lstlisting}[caption={Constraints for the goal state}, captionpos=b]
+$ All blocks are in a goal
 forall block : int(1..numBlocks) .
     exists goal : int(1..numBlocks) . 
         blocksCurrentRow[steps,block] = blocksGoalRow[goal] /\
@@ -150,7 +154,7 @@ Because it does not matter which blocks is pushed into which goal, we can say th
 \subsubsection{Invalid states}
 Next are the constraints for invalid states of the game. This restricts the model to not have states such as having the avatar and a block be in the same position. 
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Constraints to prevent invalid game states}, captionpos=b]
 $ Avatar current row/col cannot be on dead cells
 forall step : int(0..steps) .
     forall row : int(1..r) .
@@ -183,35 +187,104 @@ forall step : int(0..steps) .
 	        	blocksCurrentRow[step, checkBlock] != blocksCurrentRow[step, otherBlock] \/
 				blocksCurrentCol[step, checkBlock] != blocksCurrentCol[step, otherBlock],
 \end{lstlisting}
+All these constraints are quite similar and simply deal with not allowing the avatar or any blocks to share position or be in dead cells. An \vee is used instead of an \wedge because TODO
 
 
 \subsubsection{Movement}
-Now for movement. We need to ensure that if the \texttt{avatarCurrentRow} and \texttt{avatarCurrentCol} have different positions in different steps (i.e the avatar has moved its position), then \texttt{moveRol} and \texttt{moveCol} must be updated. Furthermore, the movement cannot be more than one step vertically or horizontally and not diagonally and there cannot be no movement.
+Now for movement. We need to ensure that if the \texttt{avatarCurrentRow} and \texttt{avatarCurrentCol} have different positions in different steps (i.e the avatar has moved its position), then \texttt{moveRol} and \texttt{moveCol} must be updated. Furthermore, the movement cannot be more than one step vertically or horizontally and not diagonally and there cannot be no movement every turn.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Updating \texttt{moveRow} and \texttt{moveCol}},captionpos=b]
 $ Update moveRow/moveCol for avatar movement
 forall step : int(1..steps) .
        moveRow[step] = avatarCurrentRow[step] - avatarCurrentRow[step-1] /\
        moveCol[step] = avatarCurrentCol[step] - avatarCurrentCol[step-1],
 
+\end{lstlisting}
+Updating \texttt{moveRow} and \texttt{moveCol} works as the game grid is indexed in order both row-wise and column-wise. To explain easily, we can rearrange the formula to be as follows:
+\begin{lstlisting}
+avatarCurrentRow[step] = moveRow[step] + avatarCurrentRow[step-1]
+avatarCurrentCol[step] = moveCol[step] + avatarCurrentCol[step-1]
+\end{lstlisting}
+This intuitively says that the avatar's current position is its previous position plus the value of its movement. This works the same for a negative value of \texttt{moveRow}/\texttt{moveCol} as that is just moving in the other direction.
+\begin{lstlisting}[caption={Prevent diagonal movement and force movement every turn}, captionpos=b]
 $ Diagonal movement not allowed and must move each turn
 forall step : int(1..steps) .
     | moveRow[step] | + | moveCol[step] | = 1,
 \end{lstlisting}
-The second constraint restricts both diagonal movement and forces the avatar to move every turn. This works because
+The second constraint restricts both diagonal movement and forces the avatar to move every turn. This works because the absolute value of \texttt{moveRow} and \texttt{moveCol} is how much the avatar has moved by. To move diagonally, the sum of \texttt{moveRow} and \texttt{moveCol} must be at least 2, as one has to move at least one row \textit{and} column. Additionally, the avatar must move every turn with this constraint as the sum is equal to 1, so \texttt{moveRow} and \texttt{moveCol} cannot both be 0 on each turn. This also constrains the avatar to only move a distance of 1 each turn.
+\n
+Next, the blocks must be pushed by the avatar must be moved. To do this, two constraints were used.
+\begin{lstlisting}[caption={Constraints for moving blocks}, captionpos=b]
+$ If block has moved, avatar must have moved into block's previous location
+forall step : int(1..steps) .
+    forall block : int(1..numBlocks) .
+        blocksCurrentRow[step-1,block] != blocksCurrentRow[step,block] \/
+		blocksCurrentCol[step-1,block] != blocksCurrentCol[step,block] ->
+	    	avatarCurrentRow[step] = blocksCurrentRow[step-1,block] /\
+	    	avatarCurrentCol[step] = blocksCurrentCol[step-1,block],
+
+$ If avatar moved into block, block move same direction
+forall step : int(1..steps) .
+    forall block : int(1..numBlocks) .
+        avatarCurrentRow[step] = blocksCurrentRow[step-1,block] /\
+		avatarCurrentCol[step] = blocksCurrentCol[step-1,block] ->
+	    	blocksCurrentRow[step,block] = blocksCurrentRow[step-1,block] + moveRow[step] /\
+	    	blocksCurrentCol[step,block] = blocksCurrentCol[step-1,block] + moveCol[step],
+\end{lstlisting}
+The first checks if a block has moved on the next step. If the block has moved, then the avatar must have moved into the block's old position as that is the only way blocks can move. However, just this constraint is not enough as it doesn't say anything about how to move the block. The second constraint moves the block by adding \texttt{moveRow} and \texttt{moveCol} to \texttt{blocksCurrentRow} and \texttt{blocksCurrentCol} respectively. This works as \texttt{moveRow} and \texttt{moveCol} directly represent the direction of the avatar's movement and blocks must be pushed in the same direction. We do not have to worry about pushing blocks into dead cells as previous constraints do not allow that to happen. 
 
 
 \subsubsection{Grid and ice}
 Finally, we have to make sure than none of the grid changes unless it is ice and it was stepped on.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption={Constraints for grid cells}, captionpos=b]
+$ Grid 0 and 2s always stay the same
+forall step : int(1..steps) .
+    forall row : int(1..r) .
+        forall col : int(1..c) .
+	    	gridCurrent[step-1,row,col] != 1 ->
+	        	gridCurrent[step,row,col] = gridCurrent[step-1,row,col],
+
+$ Ice becomes dead cell
+forall step : int(1..steps) .
+    forall row : int(1..r) .
+        forall col : int(1..c) .
+	    	avatarCurrentRow[step-1] = row /\
+	    	avatarCurrentCol[step-1] = col /\
+	    	gridCurrent[step-1,row,col] = 1 ->
+	        	gridCurrent[step,row,col] = 0,
+\end{lstlisting}
+The first constraint here ensures 0s and 2s never change, however this doesn't take into account the 1s that need to stay the same as long as the avatar has not stepped on them yet. 
+\begin{lstlisting}[caption={Additional constraint to prevent ice cells from changing}, captionpos=b]
+$Ice not stepped on doesn't change
+forall step : int(1..steps) .
+    forall row : int(1..r) .
+        forall col : int(1..c) .
+	    	gridCurrent[step-1,row,col] = 1 /\
+	    	(avatarCurrentRow[step-1] != row \/ 
+	     	avatarCurrentCol[step-1] != col) ->
+	        	gridCurrent[step,row,col] = 1
 
 \end{lstlisting}
-
+For this constraint, in addition to the grid of the previous step having to be an ice cell (\texttt{gridCurrent[step-1,row,col] = 1}), the avatar must also not have stepped on the cell in the previous turn. Only then should the ice cells stay the same.
 \subsection{Model improvements}
-
+After some testing and initial results, improvements to the original model were made that substantially reduced the number of solver nodes. 
 \subsubsection{Direct row/col}
+In a few cases, the constraints in the initial model had to loop through all steps, rows and columns, for example to check the avatar is not on a dead cell. This could be simplified to directly use the avatar's current row and column as an index rather than check every combination of step, row and col.
+\begin{lstlisting}[caption={Example of optimising number of constraints by directly indexing with \texttt{avatarCurrentRow} and \texttt{avatarCurrentCol}.}, captionpos=b]
+$ Avatar current row/col cannot be on dead cells
+forall step : int(0..steps) .
+    forall row : int(1..r) .
+        forall col : int(1..c) .
+	    	gridCurrent[step,row,col] = 0 -> 
+	    		avatarCurrentRow[step] != row \/ 
+	    		avatarCurrentCol[step] != col,
 
+$ Optimisation
+forall step : int (0..steps) .
+    gridCurrent[step, avatarCurrentRow[step], avatarCurrentCol[step]] != 0,
+\end{lstlisting}
+Other constraints of this pattern, such as checking a block on a dead cell were all changed the same way.
 
 \section{Results}
 
