@@ -2,3 +2,4 @@
 *.info
 *.infor
 *.minion
+.MINION*
