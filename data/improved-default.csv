@@ -1,0 +1,18 @@
+Parameter file, Time taken, Solver nodes, Optimisation flag, Heuristic
+Bombastic1_1.param,0.087467,1,,none
+Bombastic2_2.param,0.000117,0,,none
+Bombastic2_3.param,0.033346,1,,none
+Bombastic3_5.param,0.000897,0,,none
+Bombastic3_6.param,0.037507,19,,none
+Bombastic4_7.param,0.001406,0,,none
+Bombastic4_8.param,0.03268,1,,none
+Bombastic5_09.param,0.010127,267,,none
+Bombastic5_10.param,0.048543,615,,none
+Bombastic6_11.param,0.139865,6786,,none
+Bombastic6_12.param,0.343686,13737,,none
+Bombastic7_14.param,0.00254,0,,none
+Bombastic7_15.param,0.033888,1,,none
+Bombastic8_15.param,0.270726,18169,,none
+Bombastic8_16.param,1.08758,48055,,none
+Bombastic9_16.param,0.432952,29331,,none
+Bombastic9_17.param,1.88055,85000,,none
