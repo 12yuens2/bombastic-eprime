@@ -11,8 +11,8 @@
 \usepackage{syntax}
 \usepackage{csquotes}
 \usepackage{pgfplots}
-%\usepackage[backend=biber]{biblatex}
-%\addbibresource{references.bib}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{references.bib}
 
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
@@ -102,7 +102,7 @@
 \end{titlepage}
 }
 
-\title{The Bombastic Modelling Problem}
+\title{The B0mbastic Modelling Problem}
 \author{140011146}
 
 \makeatletter
@@ -119,7 +119,9 @@
 
 
 \section{Introduction}
-Bombastic is a Capcom video game which involves pushing dice on a grid into certain configurations. In this practical we take an abstraction of this game, modelling it in Essence Prime using the Savile Row tool and writing constraints to the problem. 
+B0mbastic is a Capcom video game which involves pushing dice on a grid into certain configurations 
+%\cite{b0mbastic}. 
+In this practical we take an abstraction of this game, modelling it in Essence Prime using the Savile Row tool and writing constraints to the problem. 
 \n
 The model and constraints are then run against a set of parameter files with different processing options in Savile Row to evaluate the performance of the model and explore the effects of heuristics and optimisations of the tool. 
 \section{Design and Implementation}
@@ -288,14 +290,15 @@ forall step : int (0..steps) .
 Other constraints of this pattern, such as checking a block on a dead cell were all changed the same way.
 
 \section{Experimentation}
-The constraint models were tested on the given parameter files and the results of the \texttt{.info} files taken. The results are then displayed and analysed to test differences in optimisation and heuristic options in Savile Row. Finally, new instances were created and tested TODO
+The constraint models were tested on the given parameter files and the results of the \texttt{.info} files taken. Except for the very first parameter file, the parameter files come in pairs of the same ``problem". We will refer to these as the same problem as the grid, blocks and goals are all the same, with the only difference between the instances being the number of steps the avatar can take. The first of each pair always has not enough steps to find a solution while the second of the pair does. For example, files \texttt{2\_2} and \texttt{2\_3} are the same problem as they are identical except for the number of steps. This feature will be important remember for our analysis. 
+\n
+The results of running the instances in Savile Row will be displayed and analysed to test differences in optimisation and heuristic options in Savile Row and how the efficiency of the models and the characteristics of problem instances relate to each other. Finally, new instances were created and tested TODO
 
 
 \subsection{Methodology}
-
-For the experiments with optimisation and heuristic options in Savile Row, both the initial model and improved model were used. This lets us see if any options can improve the efficiency in which the models find solutions without manually refining the constraints. 
+For the experiments with optimisation and heuristic options in Savile Row, both the initial model and improved model were used. This lets us see if any options can improve the efficiency of the models without manually refining the constraints. 
 \n
-The time taken by the solver is not the best metric to look at, as it is not the same on every run and dependent on the load and speed of the computer running the experiment. The number of solver nodes will also be used as a metric of how well the models perform since this number will always stay the same for the same model and problem instance. 
+The time taken by the solver is not the only metric to look at, as it is not the same on every run and dependent on the load and speed of the computer running the experiment. The number of solver nodes will also be used as a metric of how well the models perform since this number will always stay the same for the same model and problem instance. 
 
 \begin{figure}[H]
 \centering
@@ -329,7 +332,6 @@ The time taken by the solver is not the best metric to look at, as it is not the
 547184 5.78452         
 1295335 16.7512
 };
-\label{plot:initial-model}
 \end{axis}
 \end{tikzpicture}
 \end{minipage}
@@ -364,8 +366,6 @@ The time taken by the solver is not the best metric to look at, as it is not the
 29331 0.597242                                 
 85000 2.79481 
 };
-
-\label{plot:initial-model}
 \end{axis}
 \end{tikzpicture}
 \end{minipage}
@@ -373,9 +373,10 @@ The time taken by the solver is not the best metric to look at, as it is not the
 \label{fig:solver-time}
 \end{figure}
 \noindent
-To run the experiments, a simple python script was written to run Savile Row automatically with various options and the results gathered. 
-\subsection{Results}
+To run the experiments, a simple python script was written to run Savile Row automatically with various options and the results gathered. The two fields \texttt{SolverTotalTime} and \texttt{SolverNodes} from the \texttt{.info} file are used as the time taken and number of solver nodes respectively.
 
+\subsection{Results}
+From running both models against all given parameter files, we can see a simple pattern which applies to both the initial model and the improved one. As the problem instances become more complicated, the number of solver nodes and the time taken both increase. The improved model performs much better, taking less time and less nodes, but the pattern is the same.  
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
@@ -384,9 +385,9 @@ To run the experiments, a simple python script was written to run Savile Row aut
 	ybar,
 	bar width=1em,
 	width=12cm,
-	height=5cm,
+	height=4cm,
 	ylabel={Number of solver nodes},
-	ymode=log,
+	%ymode=log,
 	xlabel={Parameter file},
 	x label style={yshift=-0.5cm},
 	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
@@ -418,13 +419,58 @@ coordinates { (2,0) (4,0) (6,0) (8,267) (10,7052) (12,44769) (14,328143) (16,547
 \n
 \begin{tikzpicture}
 \begin{axis}[
+	title={\textbf{Initial model with default settings}},
+	ybar,
+	bar width=1em,
+	width=12cm,
+	height=4cm,
+	ylabel={Time taken in seconds},
+	%ymode=log,
+	xlabel={Parameter file},
+	x label style={yshift=-0.5cm},
+	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
+	xticklabels={1_1, 2_2, 2_3, 3_5, 3_6, 4_7, 4_8, 5_9, 5_10, 6_11, 6_12, 7_14, 7_15, 8_15, 8_16, 9_16, 9_17},
+	x tick label style={rotate=90, anchor=east},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+]
+
+\addplot+[
+xshift=0.5em, 
+legend image post style={xshift=-0.5em}
+] 
+coordinates { (1,0.065969) (3,0.033876) (5,0.035081) (7,0.03787) (9,0.042356) (11,0.230148) (13,1.09208) (15,8.58716) (17,15.2453) };
+\label{plot:solution-node}
+\addlegendentry{Solutions}
+
+\addplot+[
+xshift=-0.6em,
+legend image post style={xshift=0.5em}
+] 
+coordinates { (2,2.6e-05) (4,0.000738) (6,0.00137) (8,0.007254) (10,0.094615) (12,0.529334) (14,3.22285) (16,5.19558) };
+\label{plot:nosolution-node}
+\addlegendentry{No solutions}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Number of solver nodes and time taken on all given parameters for the initial model. The two different coloured bars represent parameters which either had a solution, or the solver found no solutions.}
+\end{figure}
+
+\noindent
+At first glance, it appears that the instances with solutions always take more time and nodes than an instance of the same problem with no solution. This is not intuitive as logically having no solution means the solver must search through all nodes before stopping while having a solution means a solver can stop on the first solution found (TODO Savile Row default all soltuions?). However, it is unfair to make this comparison because the instance with solutions always contain one more step compared to their counterparts. We shall revisit this issue later by defining instances with multiple solutions and running different flags on Savile Row. 
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
 	title={\textbf{Improved model with default settings}},
 	ybar,
 	bar width=1em,
 	width=12cm,
-	height=5cm,
+	height=4cm,
 	ylabel={Number of solver nodes},
-	ymode=log,
+	%ymode=log,
 	xlabel={Parameter file},
 	x label style={yshift=-0.5cm},
 	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
@@ -440,7 +486,6 @@ xshift=0.5em,
 legend image post style={xshift=-0.5em}
 ] 
 coordinates { (1,1) (3,1) (5,19) (7,1) (9,615) (11,13737) (13,1) (15,48055) (17,85000) };
-\label{plot:solution-node}
 \addlegendentry{Solutions}
 
 \addplot+[
@@ -448,26 +493,56 @@ xshift=-0.6em,
 legend image post style={xshift=0.5em}
 ] 
 coordinates { (2,0) (4,0) (6,0) (8,267) (10,6786) (12,0) (14,18169) (16,29331) };
-\label{plot:nosolution-node}
+\addlegendentry{No solutions}
+\end{axis}
+\end{tikzpicture}
+\n
+\begin{tikzpicture}
+\begin{axis}[
+	title={\textbf{Improved model with default settings}},
+	ybar,
+	bar width=1em,
+	width=12cm,
+	height=4cm,
+	ylabel={Time taken in seconds},
+	%ymode=log,
+	xlabel={Parameter file},
+	x label style={yshift=-0.5cm},
+	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
+	xticklabels={1_1, 2_2, 2_3, 3_5, 3_6, 4_7, 4_8, 5_9, 5_10, 6_11, 6_12, 7_14, 7_15, 8_15, 8_16, 9_16, 9_17},
+	x tick label style={rotate=90, anchor=east},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+]
+
+\addplot+[
+xshift=0.5em, 
+legend image post style={xshift=-0.5em}
+] 
+coordinates { (1,0.029641) (3,0.031378) (5,0.037638) (7,0.03456) (9,0.051029) (11,0.321407) (13,0.031937) (15,1.09181) (17,1.91063) };
+\addlegendentry{Solutions}
+
+\addplot+[
+xshift=-0.6em,
+legend image post style={xshift=0.5em}
+] 
+coordinates { (2,0.000611) (4,0.00091) (6,0.000311) (8,0.00986) (10,0.139993) (12,0.003395) (14,0.263946) (16,0.409637) };
 \addlegendentry{No solutions}
 
 \end{axis}
 \end{tikzpicture}
-\caption{Time taken and number of solver nodes for all given parameters}
+\caption{Number of solver nodes and time taken on all given parameters for the improved model}
 \end{figure}
-
-
-
-\begin{figure}[H]
-
-\end{figure}
+\noindent
+The improved model follows almost the same pattern as initial model, but the number of solver nodes and time taken is decreased significantly. For example the instance \texttt{9\_17} took over 15 seconds and 1 million solver nodes for the initial model while the improved model only took 2 seconds and 85000 nodes. Interestingly, problem 7 is easier for the improved model to solve.
 
 \subsubsection{Optimisations}
-
+To find out more about Savile Row and our models, we can specify the level of optimisation. 
 \begin{figure}[H]
 \centering
 \begin{minipage}{0.45\textwidth}
-\begin{tikzpicture}[scale=0.55]
+\begin{tikzpicture}[scale=0.65]
 \begin{axis}[
 	title={\textbf{Number of solver nodes}},
 	ylabel={Number of solver nodes},
@@ -485,22 +560,18 @@ coordinates { (2,0) (4,0) (6,0) (8,267) (10,6786) (12,0) (14,18169) (16,29331) }
 
 \addplot+[mark=*] coordinates {
 (1,1) (3,1) (5,21) (7,266) (9,1322) (11,23368) (13,98601) (15,729172) (17,1293411) };
-\label{plot:solution-node-o0}
 \addlegendentry{-O0}
 
 \addplot+[mark=*] coordinates {
 (1,1) (3,1) (5,19) (7,18) (9,615) (11,14036) (13,82920) (15,730259) (17,1295335)};
-\label{plot:solution-node-o1}
 \addlegendentry{-O1}
 
 \addplot+[mark=*] coordinates {
 (1,1) (3,1) (5,19) (7,18) (9,615) (11,14036) (13,82920) (15,730259) (17,1295335)};
-\label{plot:solution-node-o2}
 \addlegendentry{-O2}
 
 \addplot+[mark=*] coordinates {
 (1,1) (3,1) (5,19) (7,18) (9,615) (11,12838) (13,82920) (15,730259) (17,1295335)};
-\label{plot:solution-node-o3}
 \addlegendentry{-O3}
 
 \end{axis}
@@ -509,7 +580,7 @@ coordinates { (2,0) (4,0) (6,0) (8,267) (10,6786) (12,0) (14,18169) (16,29331) }
 \end{minipage}
 %
 \begin{minipage}{0.45\textwidth}
-\begin{tikzpicture}[scale=0.55]
+\begin{tikzpicture}[scale=0.65]
 \begin{axis}[
 	title={\textbf{Time taken}},
 	ylabel={Time taken in seconds},
@@ -528,22 +599,18 @@ coordinates { (2,0) (4,0) (6,0) (8,267) (10,6786) (12,0) (14,18169) (16,29331) }
 \addplot+[mark=*] coordinates {
 (1,0.034987) (3,0.037164) (5,0.049465) (7,0.066688) (9,0.123698) (11,1.54227) (13,4.42801) (15,31.2728) (17,55.4183)
 };
-\label{plot:nosolution-time-o0}
 \addlegendentry{-O0}
 
 \addplot+[mark=*] coordinates {
 (1,0.03391) (3,0.033884) (5,0.041397) (7,0.055702) (9,0.066537) (11,0.476045) (13,2.33189) (15,16.768) (17,29.8262)};
-\label{plot:nosolution-time-o1}
 \addlegendentry{-O1}
 
 \addplot+[mark=*] coordinates {
 (1,0.034406) (3,0.033279) (5,0.037437) (7,0.037128) (9,0.045367) (11,0.239904) (13,1.1221) (15,9.12738) (17,15.9849)};
-\label{plot:nosolution-time-o2}
 \addlegendentry{-O2}
 
 \addplot+[mark=*] coordinates {
 (1,0.034467) (3,0.037342) (5,0.036098) (7,0.037964) (9,0.045614) (11,0.228288) (13,1.22769) (15,9.84382) (17,17.5615)};
-\label{plot:nosolution-time-o3}
 \addlegendentry{-O3}
 
 \end{axis}
@@ -552,7 +619,9 @@ coordinates { (2,0) (4,0) (6,0) (8,267) (10,6786) (12,0) (14,18169) (16,29331) }
 \caption{Comparing the effect of optimisation flags on the number of nodes and time taken on the initial model for parameter files with solutions. See appendix TODO for full results.}
 \end{figure}
 \noindent
-An interesting result from using different optimisation flags in Savile Row is the effect it has on the performance of the model. Although it was shown earlier that the number of solver nodes and the time taken by the solver are equivalent for measuring the performance of the model, the optimisation flags have a much greater effect on the time taken compared to the number of nodes the solver has to search. With optimisations, the number of solver nodes only decreased by a small fraction. For many parameter files, this number did not change between the three levels of optimisation. However for the time taken by the solver, the time almost halved for most parameter files when comparing \texttt{-O0} and \texttt{-O1}. The time again decreased significantly for \texttt{-O2}, though there is little difference between \texttt{-O2} and \texttt{-O3}.
+An interesting result from using different optimisation flags in is the effect it has on the performance of the model. Although it was shown earlier that the number of solver nodes and the time taken by the solver are very similar metrics for measuring the performance of the model, the optimisation flags have a much greater effect on the time taken compared to the number of nodes the solver has to search. With optimisations, the number of solver nodes only decreased by a small fraction. For many parameter files, this number did not change between the three levels of optimisation. However for the time taken by the solver, the time almost halved for most parameter files when comparing \texttt{-O0} and \texttt{-O1}. The time again decreased significantly for \texttt{-O2}, though there is little difference between \texttt{-O2} and \texttt{-O3}.
+\n
+This shows that parts of the optimisation may be optimising Savile Row like a program, similar to how optimisation flags work in compilers like \texttt{gcc} rather than optimising it as a constraint solver. These optimisations would work well for most general programs, speeding up the run time but does little to improve our model from a constraint programming point of view. That is not to say the optimisations have no effect at all on the constraints. Figure \ref{fig:optimisation-nodes} shows that for some parameter files, the optimisation does well enough to eliminate many solver nodes. For example in problems 4 and 7, the \texttt{-O1} optimisation is able to eliminate all but 1 solver node. From the difference shown between the initial model and improved model, it can be seen that the optimisations have a stronger effect on the better model for lowering the number of solver nodes This shows it is important to have a well defined model as optimisations are not enough to overcome an inefficient model and are also more effective for good models. 
 \begin{figure}[H]
 \centering
 \begin{minipage}{0.45\textwidth}
@@ -576,12 +645,10 @@ An interesting result from using different optimisation flags in Savile Row is t
 \addplot coordinates {
 (1,1) (3,1) (5,21) (7,266) (9,1322) (11,23368) (13,98601) (15,729172) (17,1293411)
 };
-\label{plot:nosolution-time-o0}
 \addlegendentry{-O0}
 
 \addplot coordinates {
 (1,1) (3,1) (5,19) (7,18) (9,615) (11,14036) (13,82920) (15,730259) (17,1295335)};
-\label{plot:nosolution-time-o1}
 \addlegendentry{-O1}
 \end{axis}
 \end{tikzpicture}
@@ -608,12 +675,10 @@ An interesting result from using different optimisation flags in Savile Row is t
 \addplot coordinates {
 (1,1) (3,1) (5,19) (7,266) (9,1313) (11,16198) (13,5755) (15,49723) (17,88077)
 };
-\label{plot:nosolution-time-o0}
 \addlegendentry{-O0}
 
 \addplot coordinates {
 (1,1) (3,1) (5,19) (7,1) (9,615) (11,13737) (13,1) (15,48055) (17,85000)};
-\label{plot:nosolution-time-o1}
 \addlegendentry{-O1}
 \end{axis}
 \end{tikzpicture}
@@ -621,127 +686,114 @@ An interesting result from using different optimisation flags in Savile Row is t
 \caption{Effect of optimisation flags on number of solver nodes for parameter files with solutions.}
 \label{fig:optimisation-nodes}
 \end{figure}
-\noindent
-This shows that parts of the optimisation is optimising Savile Row like a program, similar to how optimisation flags work in compilers like \texttt{gcc} rather than optimising it as a constraint solver. These optimisations would work well for most general programs, speeding up the run time but does little to improve our model from a constraint programming point of view. That is not to say the optimisations have no effect at all on the constraints. Figure \ref{fig:optimisation-nodes} shows that for some parameter files, the optimisation does well enough to eliminate many solver nodes. From the difference shown between the initial model and improved model, it can be seen that the optimisations have a stronger effect on the better model. 
-
 
 \subsubsection{Heuristics}
-Another option to look at is the heuristics that Essence Prime provides. As these are heuristics that must be specified in the model (in \texttt{Bombastic.eprime}), they should only affect the number of solver nodes and not the time taken by Savile Row. 
+Another option to look at is the heuristics that Essence Prime provides. As these are heuristics that must be specified in the model (in \texttt{B0mbastic.eprime}), we are interested to see how they may affect the number of solver nodes searched by the model. Many of the problem instances follow a similar pattern for how they are affected by different heuristics. We shall focus our attention on the \texttt{9\_17} problem instance as it is the most difficult problem - takes the longest time and most solver nodes - and allows us to show this pattern without having too large a graph.
+\n
+From figure \ref{fig:heuristics}, the most interesting heuristics to take note of are \texttt{sdf} and \texttt{srf}. When using the \texttt{sdf} heuristic, we can see there is a large difference for its effect on the initial model and improved model. With optimisation flags, the heuristic causes the model to perform \textit{worse} than without any optimisation for the initial model, but it performs exceedingly well for the improved model only with optimisations on. It is impossible to say without knowing what the heuristics do how the models are actually affected, but the more concise constraints of the improved model are likely part of the cause. 
+\n
+In the case of \texttt{srf}, we again have some very interesting results. The effect of using \texttt{srf} combined with optimisations seem to have almost an opposite effect on the two models. \texttt{O1} optimisation performs worse than \texttt{O0} and \texttt{O2} and \texttt{O3} perform the best for the initial model. This directly contrasts the results for the improved model, where \texttt{O1} performs the best, \texttt{O0} the worst, but turning on higher optimisations (\texttt{O2} and \texttt{O3}) increases the number of solver nodes compared to \texttt{O1}.
+
+
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.4\textwidth}
-\begin{tikzpicture}[scale=0.6]
+\begin{tikzpicture}
 \begin{axis}[
-	title={\texttt{sdf} heuristic},
+	title={\textbf{Initial model with heuristics}},
+	ybar,
+	bar width=0.75em,
+	width=12cm,
+	height=4cm,
 	ylabel={Number of solver nodes},
 	ymode=log,
-	xlabel={Parameter file},
+	xlabel={Heuristic},
 	x label style={yshift=-0.5cm},
-	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
-	xticklabels={1_1, 2_2, 2_3, 3_5, 3_6, 4_7, 4_8, 5_9, 5_10, 6_11, 6_12, 7_14, 7_15, 8_15, 8_16, 9_16, 9_17},
+	symbolic x coords={none, sdf, srf, conflict, static},
+	xtick=data,
 	x tick label style={rotate=90, anchor=east},
 	ymajorgrids=true,
 	xmajorgrids=true,
-	legend pos=north west,
-	]
-
-\addplot[color=blue, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,21) (6,229) (7,668) (8,2184) (9,4688) (10,8579) (11,19720) (12,84300) (13,183603) (14,507126) (15,1230659) (16,844406) (17,2055840)};
-\label{plot:sdf-o0}
-\addlegendentry{O0 optimisation}
-
-\addplot[color=red, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,19) (6,0) (7,38) (8,163) (9,243) (10,1994) (11,5021) (12,73418) (13,162024) (14,502477) (15,1239351) (16,841628) (17,2077990)};
-\label{plot:sdf-o3}
-\addlegendentry{O3 optimisation}
-
-\end{axis}
-\end{tikzpicture}
-\end{minipage}
-%
-\begin{minipage}{0.4\textwidth}
-\begin{tikzpicture}[scale=0.6]
-\begin{axis}[
-	title={\texttt{static} heuristic},
-	ylabel={Number of solver nodes},
-	ymode=log,
-	xlabel={Parameter file},
-	x label style={yshift=-0.5cm},
-	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
-	xticklabels={1_1, 2_2, 2_3, 3_5, 3_6, 4_7, 4_8, 5_9, 5_10, 6_11, 6_12, 7_14, 7_15, 8_15, 8_16, 9_16, 9_17},
-	x tick label style={rotate=90, anchor=east},
-	ymajorgrids=true,
-	xmajorgrids=true,
-	legend pos=north west,
+	legend pos=outer north east,
 ]
 
-\addplot[color=blue, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,21) (6,113) (7,266) (8,422) (9,1068) (10,11586) (11,23143) (12,51454) (13,98558) (14,324862) (15,725870) (16,542821) (17,1287730) };
-\label{plot:static-o0}
-\addlegendentry{O0 optimisation}
+\addplot
+coordinates {
+(none,1293411) (sdf,2057773) (conflict,1331953) (static,1293411) (srf,1267730)
+};
+\addlegendentry{-O0}
 
-\addplot[color=red, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,19) (6,0) (7,18) (8,267) (9,615) (10,6622) (11,12838) (12,44769) (13,82920) (14,328133) (15,730243) (16,547164) (17,1295303) };
-\label{plot:static-o3}
-\addlegendentry{O3 optimisation}
+\addplot
+coordinates {
+(none,1295335) (sdf,2096419) (conflict,1163274) (static,1295335) (srf,1373057)
+};
+\addlegendentry{-O1}
+
+\addplot
+coordinates {
+(none,1295335) (sdf,2093815) (conflict,1163274) (static,1295335) (srf,1051399)
+};
+\addlegendentry{-O2}
+
+\addplot
+coordinates {
+(none,1295335) (sdf,2079703) (conflict,1163274) (static,1295335) (srf,1051399)
+};
+\addlegendentry{-O3}
 
 \end{axis}
 \end{tikzpicture}
-\end{minipage}
 \n
-\begin{minipage}{0.4\textwidth}
-\begin{tikzpicture}[scale=0.6]
+\begin{tikzpicture}
 \begin{axis}[
-	title={\texttt{conflict} heuristic},
+	title={\textbf{Improved model with heuristics}},
+	ybar,
+	bar width=0.75em,
+	width=12cm,
+	height=4cm,
 	ylabel={Number of solver nodes},
 	ymode=log,
-	xlabel={Parameter file},
+	xlabel={Heuristic},
 	x label style={yshift=-0.5cm},
-	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
-	xticklabels={1_1, 2_2, 2_3, 3_5, 3_6, 4_7, 4_8, 5_9, 5_10, 6_11, 6_12, 7_14, 7_15, 8_15, 8_16, 9_16, 9_17},
+	symbolic x coords={none, sdf, srf, conflict, static},
+	xtick=data,
 	x tick label style={rotate=90, anchor=east},
 	ymajorgrids=true,
 	xmajorgrids=true,
-	legend pos=north west,
+	legend pos=outer north east,
 ]
 
-\addplot[color=blue, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,20) (6,130) (7,344) (8,427) (9,780) (10,7417) (11,11686) (12,56819) (13,84540) (14,459939) (15,821932) (16,756356) (17,1575077)};
-\label{plot:srf-o0}
-\addlegendentry{O0 optimisation}
+\addplot
+coordinates {
+(none,88077) (sdf,745796) (conflict,54783) (static,88077) (srf,946285)
+};
+\addlegendentry{-O0}
 
-\addplot[color=red, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,19) (6,0) (7,36) (8,379) (9,327) (10,5520) (11,8760) (12,52563) (13,83408) (14,452072) (15,814969) (16,767724) (17,1163210) };
-\label{plot:srf-o3}
-\addlegendentry{O3 optimisation}
+\addplot
+coordinates {
+(none,85000) (sdf,10379) (conflict,48609) (static,85000) (srf,10185)
+};
+\addlegendentry{-O1}
+
+\addplot
+coordinates {
+(none,85000) (sdf,10379) (conflict,48609) (static,85000) (srf,94843)
+};
+\addlegendentry{-O2}
+
+\addplot
+coordinates {
+(none,85000) (sdf,10379) (conflict,48609) (static,85000) (srf,94843)
+};
+\addlegendentry{-O3}
 
 \end{axis}
 \end{tikzpicture}
-\end{minipage}
-%
-\begin{minipage}{0.4\textwidth}
-\begin{tikzpicture}[scale=0.6]
-\begin{axis}[
-	title={\texttt{srf} heuristic},
-	ylabel={Number of solver nodes},
-	ymode=log,
-	xlabel={Parameter file},
-	x label style={yshift=-0.5cm},
-	xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17},
-	xticklabels={1_1, 2_2, 2_3, 3_5, 3_6, 4_7, 4_8, 5_9, 5_10, 6_11, 6_12, 7_14, 7_15, 8_15, 8_16, 9_16, 9_17},
-	x tick label style={rotate=90, anchor=east},
-	ymajorgrids=true,
-	xmajorgrids=true,
-	legend pos=north west,
-]
-
-\addplot[color=blue, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,11) (6,239) (7,385) (8,3864) (9,8240) (10,11543) (11,25800) (12,41280) (13,92541) (14,294335) (15,750655) (16,492809) (17,1259049) };
-\label{plot:srf-o0}
-\addlegendentry{O0 optimisation}
-
-\addplot[color=red, mark=*,] coordinates { (1,1) (2,0) (3,1) (4,0) (5,19) (6,0) (7,19) (8,322) (9,529) (10,17229) (11,46027) (12,50859) (13,114193) (14,265018) (15,593370) (16,445932) (17,1051399) };
-\label{plot:srf-o3}
-\addlegendentry{O3 optimisation}
-
-\end{axis}
-\end{tikzpicture}
-\end{minipage}
-\caption{Number of solver nodes for different heuristics}
+\caption{Effect of different heuristics on problem instance \texttt{9\_17}}
+\label{fig:heuristics}
 \end{figure}
+
+\noindent
+It is important to note that these results and patterns are not unique to the \texttt{9\_17} instance and recurs in many of the given instances. Furthermore, it should also be noted that in the case of \texttt{sdf} and \texttt{srf}, using the heuristics without optimisations performs worse than not using the heuristics at all. This suggests some kind of relationship between how the heuristics and optimisations complement or contrast each other. Perhaps the heuristics create a lot of equivalent or symmetrical nodes that optimisations can easily simplify, but over-complicates the search if not simplified.
 
 \subsection{Custom instances}
 
@@ -753,7 +805,8 @@ Another option to look at is the heuristics that Essence Prime provides. As thes
 
 
 
-%\printbibliography
+
+\printbibliography
 
 \end{document}
 
