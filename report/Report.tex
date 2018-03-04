@@ -694,7 +694,6 @@ From figure \ref{fig:heuristics}, the most interesting heuristics to take note o
 \n
 In the case of \texttt{srf}, we again have some very interesting results. The effect of using \texttt{srf} combined with optimisations seem to have almost an opposite effect on the two models. \texttt{O1} optimisation performs worse than \texttt{O0} and \texttt{O2} and \texttt{O3} perform the best for the initial model. This directly contrasts the results for the improved model, where \texttt{O1} performs the best, \texttt{O0} the worst, but turning on higher optimisations (\texttt{O2} and \texttt{O3}) increases the number of solver nodes compared to \texttt{O1}.
 
-
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
@@ -796,7 +795,83 @@ coordinates {
 It is important to note that these results and patterns are not unique to the \texttt{9\_17} instance and recurs in many of the given instances. Furthermore, it should also be noted that in the case of \texttt{sdf} and \texttt{srf}, using the heuristics without optimisations performs worse than not using the heuristics at all. This suggests some kind of relationship between how the heuristics and optimisations complement or contrast each other. Perhaps the heuristics create a lot of equivalent or symmetrical nodes that optimisations can easily simplify, but over-complicates the search if not simplified.
 
 \subsection{Custom instances}
+To look into more detail at how the efficiency of the models are affected and how Savile Row works at finding solutions, some of the given instances have been modified and tested against the two models for performance. This allows us to more finely test what affects the efficiency of the model.
 
+\subsubsection{Increasing number of steps}
+First we test the effect of changing the number of steps of a problems we looked at earlier. This gives us a comparison against earlier results. The number of steps is increased and not decreased as decreasing the number of steps will only lead to having no solution due to the nature of the game. We test this for both problems with solutions after increasing the number of steps, and problems with no solutions after. Examples of the latter would be grids that contain ice such that the avatar cannot move after pushing all blocks into goals, thereby causing no solution to be found. We use default settings here only on the improved model  as we want to focus our attention on the effect of the parameter files and not on other options which were already explored earlier. Further, new problems where there are no solutions regardless - such as if the blocks and goals were unreachable by the avatar - are also explored.
+
+
+\begin{figure}[H]
+\centering
+
+\begin{tikzpicture}
+\begin{axis}[
+	title={\textbf{Modified instances of problem 3}},
+	ybar,
+	bar width=0.75em,
+	width=12cm,
+	height=3.5cm,
+	ylabel={Number of solver nodes},
+	%ymode=log,
+	xlabel={Number of steps},
+	x label style={yshift=-0.5cm},
+	symbolic x coords={6,7,8,9,10},
+	xtick=data,
+	%x tick label style={rotate=90, anchor=east},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=outer north east,
+]
+\addplot
+coordinates {
+(6,19) (7,42) (8,49) (9,77) (10,101) 
+};
+\end{axis}
+\end{tikzpicture}
+\n
+\begin{tikzpicture}
+\begin{axis}[
+	title={\textbf{Modified instances of problem 5}},
+	ybar,
+	bar width=0.75em,
+	width=12cm,
+	height=3.5cm,
+	ylabel={Number of solver nodes},
+	%ymode=log,
+	xlabel={Number of steps},
+	x label style={yshift=-0.5cm},
+	symbolic x coords={10,11,12,13,14,15},
+	%x tick label style={rotate=90, anchor=east},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=outer north east,
+]
+
+\addplot+[
+	xshift=0.5em,
+	legend image post style={xshift=-0.5em}	
+]
+coordinates {
+(10,615) (12,3617) (14,23315)
+};
+\addlegendentry{Solution}
+
+\addplot+[
+	xshift=-0.5em,
+	legend image post style={xshift=0.5em}	
+]
+coordinates {
+(11,1611) (13,10278) (15,66518)
+};
+\addlegendentry{No solutions}
+
+\end{axis}
+\end{tikzpicture}
+
+\caption{Number of nodes on the same problems but with varying number of steps required. Note that for problem 5, the number of steps determines whether there is a solution or not, while for problem 3, all instances have solutions.}
+\end{figure}
+
+\subsubsection{No solutions}
 
 \section{Conclusion and evaluation}
 
