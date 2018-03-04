@@ -1,0 +1,28 @@
+$ Grid indexing is 1-based
+
+$ Blocks and goal are inaccessible
+$ 0 0   0   0   0 0
+$ 0 *   2   2   b 0
+$ 0 2   2   2   0 0
+$ 0 2   2   g   0 0
+$ 0 0   0   0   0 0
+
+$ key: 
+$ 0 dead
+$ 1 ice
+$ 2 normal
+letting gridInit be [[0, 0, 0, 0, 0, 0],
+                     [0, 2, 2, 2, 2, 0],
+                     [0, 2, 2, 2, 0, 0],
+                     [0, 2, 2, 2, 0, 0],
+                     [0, 0, 0, 0, 0, 0]]
+      
+letting avatarInitRow be 2
+letting avatarInitCol be 2
+letting numBlocks be 1
+letting blocksInitRow be [2]
+letting blocksInitCol be [5]
+letting blocksGoalRow be [4]
+letting blocksGoalCol be [4]
+
+letting steps be 9
