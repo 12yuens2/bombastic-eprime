@@ -31,8 +31,8 @@ def run_no_opts(filename, heuristic):
     data_file.write("Parameter file, Time taken, Solver nodes, Optimisation flag, Heuristic\n")
     data_file.flush()
 
-    times,nodes = write_data(data_file, opt_flag="", heuristic=heuristic)
-    #times,nodes = get_data("")
+    #times,nodes = write_data(data_file, opt_flag="", heuristic=heuristic)
+    times,nodes = get_data("")
 
     print_timenodes(times, nodes)
     print_data({"Time": times}, {"Nodes": nodes})
@@ -49,8 +49,9 @@ filepath = "/cs/home/sy35/Documents/cs4402/s1/Bombastic/data/"
 filename_no_opts = sys.argv[1]
 filename_all_opts = sys.argv[2]
 heuristic = ""
-run_no_opts(filepath + filename_no_opts, heuristic)
-#run_all_opts(filepath + filename_all_opts, heuristic)
+
+#run_no_opts(filepath + filename_no_opts, heuristic)
+run_all_opts(filepath + filename_all_opts, heuristic)
 
 '''
 run_no_opts("", "")

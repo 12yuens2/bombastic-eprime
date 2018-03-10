@@ -1,10 +1,11 @@
 import os
 import subprocess
 
+PARAM_PATH = "../test/"
 
 def get_param_list():
     params = []
-    for param_file in os.listdir("../custom-params"):
+    for param_file in os.listdir(PARAM_PATH):
         params.append(param_file)
 
     return sorted(params)
@@ -14,9 +15,9 @@ def run_savilerow(param_file, optimisation="-O2"):
     FNULL = open(os.devnull, "w")
 
     if len(optimisation) == 0:
-        subprocess.run(["../../savilerow", "../Bombastic.eprime", "../custom-params/" + param_file, "-run-solver", "-out-minion", param_file+".minion", "-out-solution", param_file+".solution", "-out-info", param_file+".info"])
+        subprocess.run(["../../savilerow", "../Bombastic.eprime", PARAM_PATH + param_file, "-run-solver", "-out-minion", param_file+".minion", "-out-solution", param_file+".solution", "-out-info", param_file+".info"])
     else:
-        subprocess.run(["../../savilerow", "../Bombastic.eprime", "../custom-params/" + param_file, "-run-solver", "-out-minion", param_file+".minion", "-out-solution", param_file+".solution", "-out-info", param_file+".info", optimisation])
+        subprocess.run(["../../savilerow", "../Bombastic.eprime", PARAM_PATH + param_file, "-run-solver", "-all-solutions", "-out-minion", param_file+".minion", "-out-solution", param_file+".solution", "-out-info", param_file+".info", optimisation])
 
 
 
@@ -24,7 +25,7 @@ def get_data(opt_flag="-O2"):
     data_time = []
     data_nodes = []
     
-    for param_file in sorted(os.listdir("../custom-params")):
+    for param_file in sorted(os.listdir(PARAM_PATH)):
         run_savilerow(param_file, optimisation=opt_flag)
 
         with open(param_file+".info") as info_file:
@@ -56,19 +57,19 @@ def print_data_dict(data_dict):
         i = 1
         for param, time in zip(get_param_list(), data):
             if i % 2 == 0:
-                print("(" + str(param) + "," + str(time) + ")", end=" ")
+                print("(" + str(i) + "," + str(time) + ")", end=" ")
             i += 1
 
         i = 1
         for param, time in zip(get_param_list(), data):
             if i % 2 != 0:
-                print("(" + str(param) + "," + str(time) + ")", end=" ")
+                print("(" + str(i) + "," + str(time) + ")", end=" ")
             i += 1
 
         print("\n --- together---")
         i = 1
         for param, time in zip(get_param_list(), data):
-            print("(" + str(param) + "," + str(time) + ")", end=" ")
+            print("(" + str(i) + "," + str(time) + ")", end=" ")
             i += 1
 
 
@@ -98,7 +99,7 @@ def write_data(data_file, opt_flag="-O2", heuristic=""):
     data_time = []
     data_nodes = []
     
-    for param_file in sorted(os.listdir("../custom-params")):
+    for param_file in sorted(os.listdir(PARAM_PATH)):
         run_savilerow(param_file, optimisation=opt_flag)
 
         with open(param_file+".info") as info_file:
