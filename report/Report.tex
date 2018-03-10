@@ -2,6 +2,8 @@
 \usepackage{color}
 \usepackage{tikz}
 \usepackage{pgfplotstable}
+\usepackage{chngcntr}
+\usepackage[toc,page,title]{appendix}
 \usepackage{float}
 \usepackage{tabularx}
 \usepackage{amsmath}
@@ -14,6 +16,7 @@
 \usepackage[backend=biber]{biblatex}
 \addbibresource{references.bib}
 
+\usetikzlibrary{matrix}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -116,8 +119,6 @@
 \maketitlepage{CS4402 Constraint Programming}{Ian Miguel}
 
 
-
-
 \section{Introduction}
 B0mbastic is a Capcom video game which involves pushing dice on a grid into certain configurations 
 %\cite{b0mbastic}. 
@@ -125,7 +126,7 @@ In this practical we take an abstraction of this game, modelling it in Essence P
 \n
 The model and constraints are then run against a set of parameter files with different processing options in Savile Row to evaluate the performance of the model and explore the effects of heuristics and optimisations of the tool. 
 \section{Design and Implementation}
-An initial model was created to pass all tests from the given parameter files with little thought for efficiency. Afterwards, small changes were made to try and optimise the model and improve the time taken and reduce the number of solver nodes to search.
+An initial model was created to pass all tests from the given parameter files with little thought for efficiency. Afterwards, small changes were made to try and optimise the model to improve the time taken and reduce the number of solver nodes to search.
 \subsection{Initial model}
 \subsubsection{Initial and goal states}
 There are three sets of state variables that need to be set up as the initial states: the avatar's position, the locations of the blocks and the cells of the grid. 
@@ -137,102 +138,119 @@ avatarCurrentCol[0] = avatarInitCol,
 
 $ Initial locations for blocks
 forall block : int(1..numBlocks) .
-    blocksCurrentRow[0,block] = blocksInitRow[block] /\
-    blocksCurrentCol[0,block] = blocksInitCol[block],
+  blocksCurrentRow[0,block] = blocksInitRow[block] /\
+  blocksCurrentCol[0,block] = blocksInitCol[block],
 
 $ Initial cells of grid
 forall row : int(1..r) .
-    forall col : int(1..c) .
-        gridCurrent[0,row,col] = gridInit[row,col],
+  forall col : int(1..c) .
+    gridCurrent[0,row,col] = gridInit[row,col],
 \end{lstlisting}
 This sets all \texttt{current} decision variables for step 0 based on the given \texttt{init} parameter variables. All further constraints will be based on these \texttt{current} matrices and their values. Next is the constraint for the goal state.
 \begin{lstlisting}[caption={Constraints for the goal state}, captionpos=b]
 $ All blocks are in a goal
 forall block : int(1..numBlocks) .
-    exists goal : int(1..numBlocks) . 
-        blocksCurrentRow[steps,block] = blocksGoalRow[goal] /\
-		blocksCurrentCol[steps,block] = blocksGoalCol[goal],
+  exists goal : int(1..numBlocks) . 
+    blocksCurrentRow[steps,block] = blocksGoalRow[goal] /\
+	blocksCurrentCol[steps,block] = blocksGoalCol[goal],
 \end{lstlisting}
-Because it does not matter which blocks is pushed into which goal, we can say that for every block there must exist a goal it is in. This combined with the constraint that blocks cannot be in the same position means each block must be in a different goal.
+Because it does not matter which block is pushed into which goal, we can say that for every block there must exist a goal it is in. This combined with the constraint that blocks cannot be in the same position means each block must be in a different goal.
 \subsubsection{Invalid states}
 Next are the constraints for invalid states of the game. This restricts the model to not have states such as having the avatar and a block be in the same position. 
 
 \begin{lstlisting}[caption={Constraints to prevent invalid game states}, captionpos=b]
-$ Avatar current row/col cannot be on dead cells
+$ Avatar cannot be on dead cells
 forall step : int(0..steps) .
-    forall row : int(1..r) .
-        forall col : int(1..c) .
-	    	gridCurrent[step,row,col] = 0 
-	    		-> avatarCurrentRow[step] != row \/ 
-	    		   avatarCurrentCol[step] != col,
+  forall row : int(1..r) .
+    forall col : int(1..c) .
+	  gridCurrent[step,row,col] = 0 -> 
+	    avatarCurrentRow[step] != row \/ 
+	    avatarCurrentCol[step] != col,
 
 
 $ Blocks and avatar cannot share same cell
 forall step : int(0..steps) .
-    forall block : int(1..numBlocks) .
-        avatarCurrentRow[step] != blocksCurrentRow[step,block] \/
-		avatarCurrentCol[step] != blocksCurrentCol[step,block],
+  forall block : int(1..numBlocks) .
+    avatarCurrentRow[step] != blocksCurrentRow[step,block] \/
+	avatarCurrentCol[step] != blocksCurrentCol[step,block],
 
 $ Block cannot be on dead cells
 forall step : int(0..steps) .
-    forall block : int(1..numBlocks) .
-        forall row : int(1..r) .
-	    forall col : int(1..c) .
-	        gridCurrent[step,row,col] = 0 
-	        	-> blocksCurrentRow[step,block] != row \/
-				   blocksCurrentCol[step,block] != col,
+  forall block : int(1..numBlocks) .
+    forall row : int(1..r) .
+	  forall col : int(1..c) .
+	    gridCurrent[step,row,col] = 0 -> 
+	      blocksCurrentRow[step,block] != row \/
+		  blocksCurrentCol[step,block] != col,
 
 $ Blocks cannot share same cell				       
 forall step : int(0..steps) .
-    forall checkBlock : int(1..numBlocks) .
-        forall otherBlock : int(1..numBlocks) .
-	    	checkBlock != otherBlock ->
-	        	blocksCurrentRow[step, checkBlock] != blocksCurrentRow[step, otherBlock] \/
-				blocksCurrentCol[step, checkBlock] != blocksCurrentCol[step, otherBlock],
+  forall checkBlock : int(1..numBlocks) .
+    forall otherBlock : int(1..numBlocks) .
+	  checkBlock != otherBlock ->
+	    blocksCurrentRow[step, checkBlock] != blocksCurrentRow[step, otherBlock] \/
+		blocksCurrentCol[step, checkBlock] != blocksCurrentCol[step, otherBlock],
 \end{lstlisting}
-All these constraints are quite similar and simply deal with not allowing the avatar or any blocks to share position or be in dead cells. An \vee is used instead of an \wedge because TODO
+All these constraints are quite similar and simply deal with not allowing the avatar or any blocks to share position or be in dead cells. An \vee\  is used instead of an \wedge\ to convey the constraint, though they are equivalent to one another by DeMorgan's Law:
+\begin{equation}
+\texttt{!(avatarCurrentRow[step] = row \wedge\ avatarCurrentCol[step] = col)}
+\end{equation}
+\begin{equation}
+\texttt{avatarCurrentRow[step] != row \vee\ avatarCurrentCol[step] != col\ }
+\end{equation}
+\noindent
+These constraints look rather inefficient from the number of nested loops required. We shall we later in section \ref{sec:improve-row} how we can improve this. Additionally, the results found in section \ref{sec:results} show the difference in performance between the initial and improved constraints.
 
 
 \subsubsection{Movement}
-Now for movement. We need to ensure that if the \texttt{avatarCurrentRow} and \texttt{avatarCurrentCol} have different positions in different steps (i.e the avatar has moved its position), then \texttt{moveRol} and \texttt{moveCol} must be updated. Furthermore, the movement cannot be more than one step vertically or horizontally and not diagonally and there cannot be no movement every turn.
+We need to ensure that if the \texttt{avatarCurrentRow} and \texttt{avatarCurrentCol} have different positions in different steps (i.e the avatar has moved its position), then \texttt{moveRol} and \texttt{moveCol} must be updated. Furthermore, the movement cannot be more than one step vertically or horizontally and not diagonally and there cannot be no movement every turn.
 
 \begin{lstlisting}[caption={Updating \texttt{moveRow} and \texttt{moveCol}},captionpos=b]
 $ Update moveRow/moveCol for avatar movement
 forall step : int(1..steps) .
-       moveRow[step] = avatarCurrentRow[step] - avatarCurrentRow[step-1] /\
-       moveCol[step] = avatarCurrentCol[step] - avatarCurrentCol[step-1],
+  avatarCurrentRow[step-1] < avatarCurrentRow[step] -> moveRow[step] = 1,
 
+forall step : int(1..steps) .
+  avatarCurrentRow[step-1] > avatarCurrentRow[step] -> moveRow[step] = -1,
+
+forall step : int(1..steps) .
+  avatarCurrentRow[step-1] = avatarCurrentRow[step] -> moveRow[step] = 0,
+
+forall step : int(1..steps) .
+  avatarCurrentCol[step-1] < avatarCurrentCol[step] -> moveCol[step] = 1,
+
+forall step : int(1..steps) .
+  avatarCurrentCol[step-1] > avatarCurrentCol[step] -> moveCol[step] = -1,
+
+forall step : int(1..steps) .
+  avatarCurrentCol[step-1] = avatarCurrentCol[step] -> moveCol[step] = 0,
 \end{lstlisting}
-Updating \texttt{moveRow} and \texttt{moveCol} works as the game grid is indexed in order both row-wise and column-wise. To explain easily, we can rearrange the formula to be as follows:
-\begin{lstlisting}
-avatarCurrentRow[step] = moveRow[step] + avatarCurrentRow[step-1]
-avatarCurrentCol[step] = moveCol[step] + avatarCurrentCol[step-1]
-\end{lstlisting}
-This intuitively says that the avatar's current position is its previous position plus the value of its movement. This works the same for a negative value of \texttt{moveRow}/\texttt{moveCol} as that is just moving in the other direction.
+These initial constraints on both \texttt{avatarCurrentRow} and \texttt{avatarCurrentCol} checks all the cases for 1, -1 and 0 depending on whether or not the avatar's position on the next step is greater, less or equal respectively. For example if the avatar's previous position is less than the avatar's current position, then the avatar must have moved a step to the right, so \texttt{moveRow} for that step is 1. 
+\\
 \begin{lstlisting}[caption={Prevent diagonal movement and force movement every turn}, captionpos=b]
 $ Diagonal movement not allowed and must move each turn
 forall step : int(1..steps) .
-    | moveRow[step] | + | moveCol[step] | = 1,
+  | moveRow[step] | + | moveCol[step] | = 1,
 \end{lstlisting}
-The second constraint restricts both diagonal movement and forces the avatar to move every turn. This works because the absolute value of \texttt{moveRow} and \texttt{moveCol} is how much the avatar has moved by. To move diagonally, the sum of \texttt{moveRow} and \texttt{moveCol} must be at least 2, as one has to move at least one row \textit{and} column. Additionally, the avatar must move every turn with this constraint as the sum is equal to 1, so \texttt{moveRow} and \texttt{moveCol} cannot both be 0 on each turn. This also constrains the avatar to only move a distance of 1 each turn.
+This second constraint restricts both diagonal movement and forces the avatar to move every turn. This works because the absolute value of \texttt{moveRow} and \texttt{moveCol} is how much the avatar has moved by. To move diagonally, the sum of \texttt{moveRow} and \texttt{moveCol} must be at least 2, as one has to move at least one row \textit{and} column. Additionally, the avatar must move every turn with this constraint as the sum is equal to 1, so \texttt{moveRow} and \texttt{moveCol} cannot both be 0 on each turn. This also constrains the avatar to only move a distance of 1 each turn.
 \n
 Next, the blocks must be pushed by the avatar must be moved. To do this, two constraints were used.
 \begin{lstlisting}[caption={Constraints for moving blocks}, captionpos=b]
 $ If block has moved, avatar must have moved into block's previous location
 forall step : int(1..steps) .
-    forall block : int(1..numBlocks) .
-        blocksCurrentRow[step-1,block] != blocksCurrentRow[step,block] \/
-		blocksCurrentCol[step-1,block] != blocksCurrentCol[step,block] ->
-	    	avatarCurrentRow[step] = blocksCurrentRow[step-1,block] /\
-	    	avatarCurrentCol[step] = blocksCurrentCol[step-1,block],
+  forall block : int(1..numBlocks) .
+    blocksCurrentRow[step-1,block] != blocksCurrentRow[step,block] \/
+    blocksCurrentCol[step-1,block] != blocksCurrentCol[step,block] ->
+      avatarCurrentRow[step] = blocksCurrentRow[step-1,block] /\
+	  avatarCurrentCol[step] = blocksCurrentCol[step-1,block],
 
 $ If avatar moved into block, block move same direction
 forall step : int(1..steps) .
-    forall block : int(1..numBlocks) .
-        avatarCurrentRow[step] = blocksCurrentRow[step-1,block] /\
-		avatarCurrentCol[step] = blocksCurrentCol[step-1,block] ->
-	    	blocksCurrentRow[step,block] = blocksCurrentRow[step-1,block] + moveRow[step] /\
-	    	blocksCurrentCol[step,block] = blocksCurrentCol[step-1,block] + moveCol[step],
+  forall block : int(1..numBlocks) .
+    avatarCurrentRow[step] = blocksCurrentRow[step-1,block] /\
+	avatarCurrentCol[step] = blocksCurrentCol[step-1,block] ->
+	  blocksCurrentRow[step,block] = blocksCurrentRow[step-1,block] + moveRow[step] /\
+	  blocksCurrentCol[step,block] = blocksCurrentCol[step-1,block] + moveCol[step],
 \end{lstlisting}
 The first checks if a block has moved on the next step. If the block has moved, then the avatar must have moved into the block's old position as that is the only way blocks can move. However, just this constraint is not enough as it doesn't say anything about how to move the block. The second constraint moves the block by adding \texttt{moveRow} and \texttt{moveCol} to \texttt{blocksCurrentRow} and \texttt{blocksCurrentCol} respectively. This works as \texttt{moveRow} and \texttt{moveCol} directly represent the direction of the avatar's movement and blocks must be pushed in the same direction. We do not have to worry about pushing blocks into dead cells as previous constraints do not allow that to happen. 
 
@@ -243,62 +261,76 @@ Finally, we have to make sure than none of the grid changes unless it is ice and
 \begin{lstlisting}[caption={Constraints for grid cells}, captionpos=b]
 $ Grid 0 and 2s always stay the same
 forall step : int(1..steps) .
-    forall row : int(1..r) .
-        forall col : int(1..c) .
-	    	gridCurrent[step-1,row,col] != 1 ->
-	        	gridCurrent[step,row,col] = gridCurrent[step-1,row,col],
+  forall row : int(1..r) .
+    forall col : int(1..c) .
+      gridCurrent[step-1,row,col] != 1 ->
+        gridCurrent[step,row,col] = gridCurrent[step-1,row,col],
 
 $ Ice becomes dead cell
 forall step : int(1..steps) .
-    forall row : int(1..r) .
-        forall col : int(1..c) .
-	    	avatarCurrentRow[step-1] = row /\
-	    	avatarCurrentCol[step-1] = col /\
-	    	gridCurrent[step-1,row,col] = 1 ->
-	        	gridCurrent[step,row,col] = 0,
+  forall row : int(1..r) .
+    forall col : int(1..c) .
+      avatarCurrentRow[step-1] = row /\
+	  avatarCurrentCol[step-1] = col /\
+	  gridCurrent[step-1,row,col] = 1 ->
+	    gridCurrent[step,row,col] = 0,
 \end{lstlisting}
-The first constraint here ensures 0s and 2s never change, however this doesn't take into account the 1s that need to stay the same as long as the avatar has not stepped on them yet. 
+The first constraint here ensures 0s and 2s never change as live cells and dead cells always stay the same. For ice to change, we simply check if the cell is ice on the previous step and the avatar was stepping on it. Then in the next turn the ice cells turns into a dead cell. We do not have to worry about the avatar not moving as multiple other constraints prevent this from happening. The avatar must move each turn due to the movement constraints and cannot be allowed on dead cells from the invalid state constraints. However, these constraints are not enough, as the ice cells can still freely change on every turn. 
 \begin{lstlisting}[caption={Additional constraint to prevent ice cells from changing}, captionpos=b]
 $Ice not stepped on doesn't change
 forall step : int(1..steps) .
-    forall row : int(1..r) .
-        forall col : int(1..c) .
-	    	gridCurrent[step-1,row,col] = 1 /\
-	    	(avatarCurrentRow[step-1] != row \/ 
-	     	avatarCurrentCol[step-1] != col) ->
-	        	gridCurrent[step,row,col] = 1
+  forall row : int(1..r) .
+    forall col : int(1..c) .
+	  gridCurrent[step-1,row,col] = 1 /\
+	  (avatarCurrentRow[step-1] != row \/ avatarCurrentCol[step-1] != col) ->
+	    gridCurrent[step,row,col] = 1
 
 \end{lstlisting}
-For this constraint, in addition to the grid of the previous step having to be an ice cell (\texttt{gridCurrent[step-1,row,col] = 1}), the avatar must also not have stepped on the cell in the previous turn. Only then should the ice cells stay the same.
+This final constraint makes sure ice stays the same. This works by having the grid of the previous step be an ice cell (\texttt{gridCurrent[step-1,row,col] = 1}) and making sure the avatar must not have stepped on the cell in the previous turn. Then the ice cells must stay the same.
 \subsection{Model improvements}
-After some testing and initial results, improvements to the original model were made that substantially reduced the number of solver nodes. 
-\subsubsection{Direct row/col}
+After some testing and initial results, small improvements and simplifications were made to the original model that substantially reduced the number of solver nodes and time taken to run the various problem instances. 
+\subsubsection{Direct row/col}\label{sec:improve-row}
 In a few cases, the constraints in the initial model had to loop through all steps, rows and columns, for example to check the avatar is not on a dead cell. This could be simplified to directly use the avatar's current row and column as an index rather than check every combination of step, row and col.
 \begin{lstlisting}[caption={Example of optimising number of constraints by directly indexing with \texttt{avatarCurrentRow} and \texttt{avatarCurrentCol}.}, captionpos=b]
 $ Avatar current row/col cannot be on dead cells
 forall step : int(0..steps) .
-    forall row : int(1..r) .
-        forall col : int(1..c) .
-	    	gridCurrent[step,row,col] = 0 -> 
-	    		avatarCurrentRow[step] != row \/ 
-	    		avatarCurrentCol[step] != col,
+  forall row : int(1..r) .
+    forall col : int(1..c) .
+      gridCurrent[step,row,col] = 0 -> 
+        avatarCurrentRow[step] != row \/ 
+	    avatarCurrentCol[step] != col,
 
 $ Optimisation
 forall step : int (0..steps) .
-    gridCurrent[step, avatarCurrentRow[step], avatarCurrentCol[step]] != 0,
+  gridCurrent[step, avatarCurrentRow[step], avatarCurrentCol[step]] != 0,
 \end{lstlisting}
-Other constraints of this pattern, such as checking a block on a dead cell were all changed the same way.
+This reduces the number of constraints significantly, as every case of this pattern created additional $row \times\ col$ constraints. Other constraints of this pattern, such as checking a block on a dead cell were all changed the same way.
+
+\subsubsection{Movement}
+The initial movement constraints for updating \texttt{moveRow} and \texttt{moveCol} aren't very efficient because a separate constraint had to be written for each case. This was simplified as we can notice that the value of \texttt{moveRow} and \texttt{moveCol} is exactly directly related to the \texttt{avatarCurrentRow} and \texttt{avatarCurrentCol}.
+\begin{lstlisting}[caption={Refactored and improved movement constraint}, captionpos=b]
+$Update moveRow/moveCol for avatar movement
+forall step : int(1..steps) .
+    moveRow[step] = avatarCurrentRow[step] - avatarCurrentRow[step-1] /\
+    moveCol[step] = avatarCurrentCol[step] - avatarCurrentCol[step-1],
+\end{lstlisting}
+This simplification works as the game grid is indexed in order both row-wise and column-wise. To explain easily, we can rearrange the formula to be as follows:
+\begin{lstlisting}
+avatarCurrentRow[step] = moveRow[step] + avatarCurrentRow[step-1]
+avatarCurrentCol[step] = moveCol[step] + avatarCurrentCol[step-1]
+\end{lstlisting}
+This intuitively says that the avatar's current position is its previous position plus the value of its movement. This works the same for a negative value as that is just moving in the other direction.
 
 \section{Experimentation}
-The constraint models were tested on the given parameter files and the results of the \texttt{.info} files taken. Except for the very first parameter file, the parameter files come in pairs of the same ``problem". We will refer to these as the same problem as the grid, blocks and goals are all the same, with the only difference between the instances being the number of steps the avatar can take. The first of each pair always has not enough steps to find a solution while the second of the pair does. For example, files \texttt{2\_2} and \texttt{2\_3} are the same problem as they are identical except for the number of steps. This feature will be important remember for our analysis. 
+The constraint models were tested on the given parameter files and the results of the \texttt{.info} files taken. Except for the very first parameter file, the parameter files come in pairs of the same ``problem". We will refer to these as the same problem as the grid, blocks and goals are all the same, with the only difference between the instances being the number of steps the avatar can take. The first of each pair always has not enough steps to find a solution while the second of the pair does. For example, files \texttt{2\_2} and \texttt{2\_3} are the same problem as they are identical except for the number of steps. This feature will be important to remember for our analysis. 
 \n
 The results of running the instances in Savile Row will be displayed and analysed to test differences in optimisation and heuristic options in Savile Row and how the efficiency of the models and the characteristics of problem instances relate to each other. Finally, new instances were created and tested TODO
 
 
 \subsection{Methodology}
-For the experiments with optimisation and heuristic options in Savile Row, both the initial model and improved model were used. This lets us see if any options can improve the efficiency of the models without manually refining the constraints. 
+For the experiments with optimisation and heuristic options in Savile Row, both the initial model and improved model were used. This lets us see if any options can improve the efficiency of the models without manually refining the constraints and also shows the effectiveness of the optimisations and heuristics on the different models.
 \n
-The time taken by the solver is not the only metric to look at, as it is not the same on every run and dependent on the load and speed of the computer running the experiment. The number of solver nodes will also be used as a metric of how well the models perform since this number will always stay the same for the same model and problem instance. 
+The time taken by the solver is not the only metric to look at, as it is not the same on every run and dependent on the load and speed of the computer running the experiment. The number of solver nodes will also be used as a metric of how well the models perform since this number should be deterministic for the same model and problem instance. 
 
 \begin{figure}[H]
 \centering
@@ -369,13 +401,13 @@ The time taken by the solver is not the only metric to look at, as it is not the
 \end{axis}
 \end{tikzpicture}
 \end{minipage}
-\caption{Number of solver nodes plotted against time for both initial and improved models. We can see a strong linear relationship between the time taken and number of solver nodes. This shows both are equivalent metrics for measuring the performance of our model.}
+\caption{Number of solver nodes plotted against time for both initial and improved models. We can see a strong linear relationship between the time taken and number of solver nodes. This shows both are similar metrics for measuring the performance of our model.}
 \label{fig:solver-time}
 \end{figure}
 \noindent
 To run the experiments, a simple python script was written to run Savile Row automatically with various options and the results gathered. The two fields \texttt{SolverTotalTime} and \texttt{SolverNodes} from the \texttt{.info} file are used as the time taken and number of solver nodes respectively.
 
-\subsection{Results}
+\subsection{Results}\label{sec:results}
 From running both models against all given parameter files, we can see a simple pattern which applies to both the initial model and the improved one. As the problem instances become more complicated, the number of solver nodes and the time taken both increase. The improved model performs much better, taking less time and less nodes, but the pattern is the same.  
 \begin{figure}[H]
 \centering
@@ -535,7 +567,7 @@ coordinates { (2,0.000611) (4,0.00091) (6,0.000311) (8,0.00986) (10,0.139993) (1
 \caption{Number of solver nodes and time taken on all given parameters for the improved model}
 \end{figure}
 \noindent
-The improved model follows almost the same pattern as initial model, but the number of solver nodes and time taken is decreased significantly. For example the instance \texttt{9\_17} took over 15 seconds and 1 million solver nodes for the initial model while the improved model only took 2 seconds and 85000 nodes. Interestingly, problem 7 is easier for the improved model to solve.
+The improved model follows almost the same pattern as initial model, but the number of solver nodes and time taken is decreased significantly. For example the instance \texttt{9\_17} took over 15 seconds and 1 million solver nodes for the initial model while the improved model only took 2 seconds and 85000 nodes. Interestingly, problem 7 is easier for the improved model to solve and is an anomaly to the pattern of increasing time and number of nodes. 
 
 \subsubsection{Optimisations}
 To find out more about Savile Row and our models, we can specify the level of optimisation. 
@@ -616,7 +648,7 @@ To find out more about Savile Row and our models, we can specify the level of op
 \end{axis}
 \end{tikzpicture}
 \end{minipage}
-\caption{Comparing the effect of optimisation flags on the number of nodes and time taken on the initial model for parameter files with solutions. See appendix TODO for full results.}
+\caption{Comparing the effect of optimisation flags on the number of nodes and time taken on the initial model for parameter files with solutions. See appendix \ref{apdx:opt-flags} for full results.}
 \end{figure}
 \noindent
 An interesting result from using different optimisation flags in is the effect it has on the performance of the model. Although it was shown earlier that the number of solver nodes and the time taken by the solver are very similar metrics for measuring the performance of the model, the optimisation flags have a much greater effect on the time taken compared to the number of nodes the solver has to search. With optimisations, the number of solver nodes only decreased by a small fraction. For many parameter files, this number did not change between the three levels of optimisation. However for the time taken by the solver, the time almost halved for most parameter files when comparing \texttt{-O0} and \texttt{-O1}. The time again decreased significantly for \texttt{-O2}, though there is little difference between \texttt{-O2} and \texttt{-O3}.
@@ -688,7 +720,7 @@ This shows that parts of the optimisation may be optimising Savile Row like a pr
 \end{figure}
 
 \subsubsection{Heuristics}
-Another option to look at is the heuristics that Essence Prime provides. As these are heuristics that must be specified in the model (in \texttt{B0mbastic.eprime}), we are interested to see how they may affect the number of solver nodes searched by the model. Many of the problem instances follow a similar pattern for how they are affected by different heuristics. We shall focus our attention on the \texttt{9\_17} problem instance as it is the most difficult problem - takes the longest time and most solver nodes - and allows us to show this pattern without having too large a graph.
+Another option to look at is the heuristics that Essence Prime provides. As these are heuristics that must be specified in the model (in \texttt{B0mbastic.eprime}), we are interested to see how they may affect the number of solver nodes searched by the model. Many of the problem instances follow a similar pattern for how they are affected by different heuristics. We shall focus our attention on the \texttt{9\_17} problem instance as it is the most difficult problem - takes the longest time and most solver nodes - and allows us to show this pattern without having too complex  a graph.
 \n
 From figure \ref{fig:heuristics}, the most interesting heuristics to take note of are \texttt{sdf} and \texttt{srf}. When using the \texttt{sdf} heuristic, we can see there is a large difference for its effect on the initial model and improved model. With optimisation flags, the heuristic causes the model to perform \textit{worse} than without any optimisation for the initial model, but it performs exceedingly well for the improved model only with optimisations on. It is impossible to say without knowing what the heuristics do how the models are actually affected, but the more concise constraints of the improved model are likely part of the cause. 
 \n
@@ -795,7 +827,7 @@ coordinates {
 It is important to note that these results and patterns are not unique to the \texttt{9\_17} instance and recurs in many of the given instances. Furthermore, it should also be noted that in the case of \texttt{sdf} and \texttt{srf}, using the heuristics without optimisations performs worse than not using the heuristics at all. This suggests some kind of relationship between how the heuristics and optimisations complement or contrast each other. Perhaps the heuristics create a lot of equivalent or symmetrical nodes that optimisations can easily simplify, but over-complicates the search if not simplified.
 
 \subsection{Custom instances}
-To look into more detail at how the efficiency of the models are affected and how Savile Row works at finding solutions, some of the given instances have been modified and tested against the two models for performance. This allows us to more finely test what affects the efficiency of the model.
+To look into more detail at how the efficiency of the models are affected and how Savile Row works at finding solutions, some of the given instances have been modified and tested against the two models for performance. This allows us to more finely test what affects the efficiency of the model and isolate specific variables to change and test.
 
 \subsubsection{Increasing number of steps}
 First we test the effect of changing the number of steps of a problems we looked at earlier. This gives us a comparison against earlier results. The number of steps is increased and not decreased as decreasing the number of steps will only lead to having no solution due to the nature of the game. We test this for both problems with solutions after increasing the number of steps, and problems with no solutions after. Examples of the latter would be grids that contain ice such that the avatar cannot move after pushing all blocks into goals, thereby causing no solution to be found. We use default settings here only on the improved model  as we want to focus our attention on the effect of the parameter files and not on other options which were already explored earlier. Further, new problems where there are no solutions regardless - such as if the blocks and goals were unreachable by the avatar - are also explored.
@@ -873,10 +905,201 @@ coordinates {
 
 \subsubsection{No solutions}
 
+\subsubsection{Increasing cube problems}
+A custom instance that was created and tested was an $n \times n$ cube where the avatar always started at the top left, the goal is always at the bottom right and the one single block is always on the cell directly top left of the goal. The $n \times n$ here is the size of the live cells in the problem grid, not taking into account the ring of dead cells. These problems were created to isolate two variables. First is how the size of the grid affected the time and number of nodes to find a solution. The second is to find out how Savile Row and our B0mbastic model deals with problems with multiple solutions, since all the given problem instances only have one valid solution. 
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{ | c | c | c | c | c | }
+\hline
+0 & 0 & 0 & 0 & 0 \\ \hline
+0 & \textbf{P} & 2 & 2 & 0 \\ \hline
+0 & 2 & \textbf{B} & 2 & 0 \\ \hline
+0 & 2 & 2 & \textbf{G} & 0 \\ \hline
+0 & 0 & 0 & 0 & 0 \\ \hline
+\end{tabular}
+\hspace{1cm}
+\begin{tabular}{ | c | c | c | c | c | c | c | c | }
+\hline
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
+0 & \textbf{P} & 2 & 2 & 2 & 2 & 2 & 0 \\ \hline
+0 & 2 & 2 & 2 & 2 & 2 & 2 & 0 \\ \hline
+0 & 2 & 2 & 2 & 2 & 2 & 2 & 0 \\ \hline
+0 & 2 & 2 & 2 & 2 & 2 & 2 & 0 \\ \hline
+0 & 2 & 2 & 2 & 2 & \textbf{B} & 2 & 0 \\ \hline
+0 & 2 & 2 & 2 & 2 & 2 & \textbf{G} & 0 \\ \hline
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
+\end{tabular}
+\caption{Examples of a $3 \times 3$ and $6 \times 6$ cube problem instance on the left and right respectively.}
+\end{figure}
+\noindent
+Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with the improved model. 
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.65]
+\begin{axis}[
+	title={\textbf{Number of solver nodes}},
+	%ybar,
+	ylabel={Number of solver nodes},
+	%ymode=log,
+	xlabel={Size of cube problem},
+	x label style={yshift=-0.5cm},
+	xtick={1,2,3,4,5,6,7},
+	xticklabels={3,4,5,6,7,8,9},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+	cycle list name=color list,
+	]
+
+\addplot+[mark=*] coordinates {
+(1,26) (2,91) (3,202) (4,569) (5,1007) (6,1961) (7,3111) };
+\addlegendentry{-O0}
+
+\addplot+[mark=*] coordinates {
+(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)};
+\addlegendentry{-O1}
+
+\addplot+[mark=*] coordinates {
+(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)};
+\addlegendentry{-O2}
+
+\addplot+[mark=*] coordinates {
+(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)};
+\addlegendentry{-O3}
+
+\end{axis}
+
+\end{tikzpicture}
+\end{minipage}
+%
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.65]
+\begin{axis}[
+	title={\textbf{Time taken}},
+	%ybar,
+	ylabel={Time taken in seconds},
+	%ymode=log,
+	xlabel={Size of cube problem},
+	x label style={yshift=-0.5cm},
+	xtick={1,2,3,4,5,6,7},
+	xticklabels={3,4,5,6,7,8,9},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+	cycle list name=color list,
+	]
+
+\addplot+[mark=*] coordinates {
+(1,0.036699) (2,0.048209) (3,0.073289) (4,0.105752) (5,0.213041) (6,0.385509) (7,0.691582) 
+};
+\addlegendentry{-O0}
+
+\addplot+[mark=*] coordinates {
+(1,0.034287) (2,0.037479) (3,0.040116) (4,0.043055) (5,0.051263) (6,0.063065) (7,0.080922) };
+\addlegendentry{-O1}
+
+\addplot+[mark=*] coordinates {
+(1,0.034397) (2,0.035583) (3,0.03793) (4,0.042398) (5,0.045988) (6,0.058425) (7,0.06942)};
+\addlegendentry{-O2}
+
+\addplot+[mark=*] coordinates {
+(1,0.035515) (2,0.037177) (3,0.03824) (4,0.04338) (5,0.048467) (6,0.057125) (7,0.069001)};
+\addlegendentry{-O3}
+
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+\caption{Results of running all cube problems}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.65]
+\begin{axis}[
+	title={\textbf{Number of solver nodes}},
+	%ybar,
+	ylabel={Number of solver nodes},
+	%ymode=log,
+	xlabel={Size of cube problem},
+	x label style={yshift=-0.5cm},
+	xtick={1,2,3,4,5,6,7},
+	xticklabels={3,4,5,6,7,8,9},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+	cycle list name=color list,
+	]
+
+\addplot+[mark=*] coordinates {
+(1,26) (2,91) (3,202) (4,569) (5,1007) (6,1961) (7,3111) };
+\addlegendentry{-O0}
+
+\addplot+[mark=*] coordinates {
+(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)};
+\addlegendentry{-O1}
+
+\addplot+[mark=*] coordinates {
+(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)};
+\addlegendentry{-O2}
+
+\addplot+[mark=*] coordinates {
+(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)};
+\addlegendentry{-O3}
+
+\end{axis}
+
+\end{tikzpicture}
+\end{minipage}
+%
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.65]
+\begin{axis}[
+	title={\textbf{Time taken}},
+	%ybar,
+	ylabel={Time taken in seconds},
+	%ymode=log,
+	xlabel={Size of cube problem},
+	x label style={yshift=-0.5cm},
+	xtick={1,2,3,4,5,6,7},
+	xticklabels={3,4,5,6,7,8,9},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+	cycle list name=color list,
+	]
+
+\addplot+[mark=*] coordinates {
+(1,0.036699) (2,0.048209) (3,0.073289) (4,0.105752) (5,0.213041) (6,0.385509) (7,0.691582) 
+};
+\addlegendentry{-O0}
+
+\addplot+[mark=*] coordinates {
+(1,0.034287) (2,0.037479) (3,0.040116) (4,0.043055) (5,0.051263) (6,0.063065) (7,0.080922) };
+\addlegendentry{-O1}
+
+\addplot+[mark=*] coordinates {
+(1,0.034397) (2,0.035583) (3,0.03793) (4,0.042398) (5,0.045988) (6,0.058425) (7,0.06942)};
+\addlegendentry{-O2}
+
+\addplot+[mark=*] coordinates {
+(1,0.035515) (2,0.037177) (3,0.03824) (4,0.04338) (5,0.048467) (6,0.057125) (7,0.069001)};
+\addlegendentry{-O3}
+
+\end{axis}
+\end{tikzpicture}
+\end{minipage}
+\caption{Results of running all cube problems}
+\end{figure}
+
+
 \section{Conclusion and evaluation}
 
 
-\section{Appendix}
+\include{Appendix}
 
 
 
