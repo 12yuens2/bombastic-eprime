@@ -105,7 +105,7 @@
 \end{titlepage}
 }
 
-\title{The B0mbastic Modelling Problem}
+\title{The Bombastic Modelling Problem}
 \author{140011146}
 
 \makeatletter
@@ -120,9 +120,7 @@
 
 
 \section{Introduction}
-B0mbastic is a Capcom video game which involves pushing dice on a grid into certain configurations 
-%\cite{b0mbastic}. 
-In this practical we take an abstraction of this game, modelling it in Essence Prime using the Savile Row tool and writing constraints to the problem. 
+Bombastic is a Capcom video game which involves pushing dice on a grid into certain configurations. In this practical we take an abstraction of this game, modelling it in Essence Prime using the Savile Row tool and writing constraints to the problem. 
 \n
 The model and constraints are then run against a set of parameter files with different processing options in Savile Row to evaluate the performance of the model and explore the effects of heuristics and optimisations of the tool. 
 \section{Design and Implementation}
@@ -324,91 +322,22 @@ This intuitively says that the avatar's current position is its previous positio
 \section{Experimentation}
 The constraint models were tested on the given parameter files and the results of the \texttt{.info} files taken. Except for the very first parameter file, the parameter files come in pairs of the same ``problem". We will refer to these as the same problem as the grid, blocks and goals are all the same, with the only difference between the instances being the number of steps the avatar can take. The first of each pair always has not enough steps to find a solution while the second of the pair does. For example, files \texttt{2\_2} and \texttt{2\_3} are the same problem as they are identical except for the number of steps. This feature will be important to remember for our analysis. 
 \n
-The results of running the instances in Savile Row will be displayed and analysed to test differences in optimisation and heuristic options in Savile Row and how the efficiency of the models and the characteristics of problem instances relate to each other. Finally, new instances were created and tested TODO
+The results of running the instances in Savile Row are displayed and analysed to test differences in optimisation and heuristic options in Savile Row and how the efficiency of the models and the characteristics of problem instances relate to each other. 
+\n
+New custom instances were also created and tested. These problem instances each have their own properties which were designed to test specific elements of the model.
 
 
 \subsection{Methodology}
 For the experiments with optimisation and heuristic options in Savile Row, both the initial model and improved model were used. This lets us see if any options can improve the efficiency of the models without manually refining the constraints and also shows the effectiveness of the optimisations and heuristics on the different models.
 \n
 The time taken by the solver is not the only metric to look at, as it is not the same on every run and dependent on the load and speed of the computer running the experiment. The number of solver nodes will also be used as a metric of how well the models perform since this number should be deterministic for the same model and problem instance. 
-
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.4\textwidth}
-\begin{tikzpicture}[scale=0.6]
-\begin{axis}[
-	title={\textbf{Initial model}},
-	ylabel={Time taken in seconds},
-	xlabel={Number of solver nodes},
-	ymajorgrids=true,
-	xmajorgrids=true,
-	legend pos=north west,
-	]
-	
-\addplot+[only marks, mark=*] table {
-1 0.033224             
-0 0.000586             
-1 0.030841             
-0 0.000814             
-19 0.03524             
-0 0.001459             
-18 0.038105            
-267 0.006645           
-615 0.044015           
-7052 0.099708          
-14036 0.225809         
-44769 0.574981         
-82920 1.1448           
-328143 3.48632         
-730259 9.01066         
-547184 5.78452         
-1295335 16.7512
-};
-\end{axis}
-\end{tikzpicture}
-\end{minipage}
-%
-\begin{minipage}{0.4\textwidth}
-\begin{tikzpicture}[scale=0.6]
-\begin{axis}[
-	title={\textbf{Improved model}},
-	ylabel={Time taken in seconds},
-	xlabel={Number of solver nodes},
-	ymajorgrids=true,
-	xmajorgrids=true,
-	legend pos=north west,
-	]
-	
-\addplot+[only marks, mark=*] table {
-1 0.047307                                     
-0 0.0                                          
-1 0.047608                                     
-0 0.000834                                     
-19 0.065945                                    
-0 0.001938                                     
-1 0.049589                                     
-267 0.02942                                    
-615 0.083765                                   
-6786 0.213979                                  
-13737 0.484895                                 
-0 0.007957                                     
-1 0.047291                                     
-18169 0.387194                                 
-48055 1.57321                                  
-29331 0.597242                                 
-85000 2.79481 
-};
-\end{axis}
-\end{tikzpicture}
-\end{minipage}
-\caption{Number of solver nodes plotted against time for both initial and improved models. We can see a strong linear relationship between the time taken and number of solver nodes. This shows both are similar metrics for measuring the performance of our model.}
-\label{fig:solver-time}
-\end{figure}
-\noindent
+\n
+For the custom instances, only the improved model was used as we want to test the elements that affect the efficiency of the model and not test the model itself. 
+\n
 To run the experiments, a simple python script was written to run Savile Row automatically with various options and the results gathered. The two fields \texttt{SolverTotalTime} and \texttt{SolverNodes} from the \texttt{.info} file are used as the time taken and number of solver nodes respectively.
 
 \subsection{Results}\label{sec:results}
-From running both models against all given parameter files, we can see a simple pattern which applies to both the initial model and the improved one. As the problem instances become more complicated, the number of solver nodes and the time taken both increase. The improved model performs much better, taking less time and less nodes, but the pattern is the same.  
+From running both models against all given parameter files, we can see a simple pattern which applies to both the initial model and the improved one. As the problem instances become more complicated, the number of solver nodes and the time taken both increase together. The improved model performs much better, taking less time and less nodes, but the pattern is the same.  
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}
@@ -488,9 +417,8 @@ coordinates { (2,2.6e-05) (4,0.000738) (6,0.00137) (8,0.007254) (10,0.094615) (1
 \end{tikzpicture}
 \caption{Number of solver nodes and time taken on all given parameters for the initial model. The two different coloured bars represent parameters which either had a solution, or the solver found no solutions.}
 \end{figure}
-
 \noindent
-At first glance, it appears that the instances with solutions always take more time and nodes than an instance of the same problem with no solution. This is not intuitive as logically having no solution means the solver must search through all nodes before stopping while having a solution means a solver can stop on the first solution found (TODO Savile Row default all soltuions?). However, it is unfair to make this comparison because the instance with solutions always contain one more step compared to their counterparts. We shall revisit this issue later by defining instances with multiple solutions and running different flags on Savile Row. 
+At first glance, it appears that the instances with solutions always take more time and nodes than an instance of the same problem with no solution. This is not intuitive as logically having no solution means the solver must search through all nodes before stopping while having a solution means a solver can stop on the first solution found. However, it is unfair to make this comparison because the instance with solutions always contain one more step compared to their counterparts. We shall revisit this issue later by defining instances with multiple solutions and instances with more steps. 
 
 \begin{figure}[H]
 \centering
@@ -567,9 +495,9 @@ coordinates { (2,0.000611) (4,0.00091) (6,0.000311) (8,0.00986) (10,0.139993) (1
 \caption{Number of solver nodes and time taken on all given parameters for the improved model}
 \end{figure}
 \noindent
-The improved model follows almost the same pattern as initial model, but the number of solver nodes and time taken is decreased significantly. For example the instance \texttt{9\_17} took over 15 seconds and 1 million solver nodes for the initial model while the improved model only took 2 seconds and 85000 nodes. Interestingly, problem 7 is easier for the improved model to solve and is an anomaly to the pattern of increasing time and number of nodes. 
+The improved model follows almost the same pattern as initial model, but the number of solver nodes and time taken is decreased significantly. For example the instance \texttt{9\_17} took over 15 seconds and 1 million solver nodes for the initial model while the improved model only took 2 seconds and 85000 nodes. This indicates the improved constraints help reduce the effort required by the solver by being more precise. Interestingly, problem 7 is easier for the improved model to solve and is an anomaly to the pattern of increasing time and number of nodes. 
 
-\subsubsection{Optimisations}
+\subsubsection{Optimisations}\label{sec:optimisation}
 To find out more about Savile Row and our models, we can specify the level of optimisation. 
 \begin{figure}[H]
 \centering
@@ -605,17 +533,16 @@ To find out more about Savile Row and our models, we can specify the level of op
 \addplot+[mark=*] coordinates {
 (1,1) (3,1) (5,19) (7,18) (9,615) (11,12838) (13,82920) (15,730259) (17,1295335)};
 \addlegendentry{-O3}
-
 \end{axis}
-
 \end{tikzpicture}
 \end{minipage}
-%
+\hspace{0.4cm}
 \begin{minipage}{0.45\textwidth}
 \begin{tikzpicture}[scale=0.65]
 \begin{axis}[
 	title={\textbf{Time taken}},
 	ylabel={Time taken in seconds},
+	y label style={yshift=-0.3cm},
 	%ymode=log,
 	xlabel={Parameter file},
 	x label style={yshift=-0.5cm},
@@ -653,7 +580,9 @@ To find out more about Savile Row and our models, we can specify the level of op
 \noindent
 An interesting result from using different optimisation flags in is the effect it has on the performance of the model. Although it was shown earlier that the number of solver nodes and the time taken by the solver are very similar metrics for measuring the performance of the model, the optimisation flags have a much greater effect on the time taken compared to the number of nodes the solver has to search. With optimisations, the number of solver nodes only decreased by a small fraction. For many parameter files, this number did not change between the three levels of optimisation. However for the time taken by the solver, the time almost halved for most parameter files when comparing \texttt{-O0} and \texttt{-O1}. The time again decreased significantly for \texttt{-O2}, though there is little difference between \texttt{-O2} and \texttt{-O3}.
 \n
-This shows that parts of the optimisation may be optimising Savile Row like a program, similar to how optimisation flags work in compilers like \texttt{gcc} rather than optimising it as a constraint solver. These optimisations would work well for most general programs, speeding up the run time but does little to improve our model from a constraint programming point of view. That is not to say the optimisations have no effect at all on the constraints. Figure \ref{fig:optimisation-nodes} shows that for some parameter files, the optimisation does well enough to eliminate many solver nodes. For example in problems 4 and 7, the \texttt{-O1} optimisation is able to eliminate all but 1 solver node. From the difference shown between the initial model and improved model, it can be seen that the optimisations have a stronger effect on the better model for lowering the number of solver nodes This shows it is important to have a well defined model as optimisations are not enough to overcome an inefficient model and are also more effective for good models. 
+This shows us that the optimisation does less to cull search nodes, but perhaps more to reduce processing time in generating the nodes or does more to be able to search through the nodes efficiently, especially as the problem sizes and complexity grows (size and complexity here refer to larger grids and more complicated grid setups like having ice blocks or multiple block to push). 
+\n
+That is not to say the optimisations have no effect at all on the solver nodes. Figure \ref{fig:optimisation-nodes} shows that for some parameter files, the optimisation does well enough to eliminate many solver nodes. For example in problems 4 and 7, the \texttt{-O1} optimisation is able to eliminate all but 1 solver node. From the difference shown between the initial model and improved model, it can be seen that the optimisations have a stronger effect on the better model for lowering the number of solver nodes This shows it is important to have a well defined model as optimisations are not enough to overcome an inefficient model and are also more effective for good models. 
 \begin{figure}[H]
 \centering
 \begin{minipage}{0.45\textwidth}
@@ -663,9 +592,10 @@ This shows that parts of the optimisation may be optimising Savile Row like a pr
 	ybar,
 	bar width=0.8em,
 	ylabel={Number of solver nodes},
+	y label style={yshift=-0.3cm},
 	ymode=log,
 	xlabel={Parameter file},
-	x label style={yshift=-1cm},
+	x label style={yshift=-0.5cm},
 	xtick={1,3,5,7,9,11,13,15,17},
 	xticklabels={1_1, 2_3, 3_6, 4_8, 5_10, 6_12, 7_15, 8_16, 9_17},
 	x tick label style={rotate=90, anchor=east},
@@ -685,7 +615,7 @@ This shows that parts of the optimisation may be optimising Savile Row like a pr
 \end{axis}
 \end{tikzpicture}
 \end{minipage}
-%
+\hspace{0.5cm}
 \begin{minipage}{0.45\textwidth}
 \begin{tikzpicture}[scale=0.65]
 \begin{axis}[
@@ -695,7 +625,7 @@ This shows that parts of the optimisation may be optimising Savile Row like a pr
 	ylabel={Number of solver nodes},
 	ymode=log,
 	xlabel={Parameter file},
-	x label style={yshift=-1cm},
+	x label style={yshift=-0.5cm},
 	xtick={1,3,5,7,9,11,13,15,17},
 	xticklabels={1_1, 2_3, 3_6, 4_8, 5_10, 6_12, 7_15, 8_16, 9_17},
 	x tick label style={rotate=90, anchor=east},
@@ -720,11 +650,11 @@ This shows that parts of the optimisation may be optimising Savile Row like a pr
 \end{figure}
 
 \subsubsection{Heuristics}
-Another option to look at is the heuristics that Essence Prime provides. As these are heuristics that must be specified in the model (in \texttt{B0mbastic.eprime}), we are interested to see how they may affect the number of solver nodes searched by the model. Many of the problem instances follow a similar pattern for how they are affected by different heuristics. We shall focus our attention on the \texttt{9\_17} problem instance as it is the most difficult problem - takes the longest time and most solver nodes - and allows us to show this pattern without having too complex  a graph.
+Another option to look at is the heuristics that Essence Prime provides. As these are heuristics that must be specified in the model (in \texttt{Bombastic.eprime}), we are interested to see how they may affect the number of solver nodes searched by the model. Many of the problem instances follow a similar pattern for how they are affected by different heuristics. We shall focus our attention on the \texttt{9\_17} problem instance as it is the most difficult problem - takes the longest time and most solver nodes - and allows us to find patterns without having too complex a graph.
 \n
-From figure \ref{fig:heuristics}, the most interesting heuristics to take note of are \texttt{sdf} and \texttt{srf}. When using the \texttt{sdf} heuristic, we can see there is a large difference for its effect on the initial model and improved model. With optimisation flags, the heuristic causes the model to perform \textit{worse} than without any optimisation for the initial model, but it performs exceedingly well for the improved model only with optimisations on. It is impossible to say without knowing what the heuristics do how the models are actually affected, but the more concise constraints of the improved model are likely part of the cause. 
+From figure \ref{fig:heuristics}, the most interesting heuristics to take note of are \texttt{sdf} and \texttt{srf}. When using the \texttt{sdf} heuristic, we can see there is a large difference for its effect on the initial model and improved model. With optimisation flags, the heuristic causes the model to perform \textit{worse} than without any optimisation for the initial model, but it performs well for the improved model only with optimisations on. It is impossible to say without knowing what the heuristics do how the models are actually affected, but the more concise constraints of the improved model are likely part of the cause. 
 \n
-In the case of \texttt{srf}, we again have some very interesting results. The effect of using \texttt{srf} combined with optimisations seem to have almost an opposite effect on the two models. \texttt{O1} optimisation performs worse than \texttt{O0} and \texttt{O2} and \texttt{O3} perform the best for the initial model. This directly contrasts the results for the improved model, where \texttt{O1} performs the best, \texttt{O0} the worst, but turning on higher optimisations (\texttt{O2} and \texttt{O3}) increases the number of solver nodes compared to \texttt{O1}.
+In the case of \texttt{srf}, we again have some very interesting results. The effect of using \texttt{srf} combined with optimisations seem to have almost an opposite effect on the two models. \texttt{O1} optimisation performs worse than \texttt{O0} and \texttt{O2} and \texttt{O3} perform the best for the initial model. This directly contrasts the results for the improved model, where \texttt{O1} performs the best, \texttt{O0} the worst, but turning on higher optimisations (\texttt{O2} and \texttt{O3}) increases the number of solver nodes compared to \texttt{O1}. There may be some work that the heuristic does that additional optimisations do not take advantage of or their combination conflicts with each other. Of course, even though \texttt{srt} performs better on higher optimisations for the initial model, the number of nodes is still greater. 
 
 \begin{figure}[H]
 \centering
@@ -827,11 +757,11 @@ coordinates {
 It is important to note that these results and patterns are not unique to the \texttt{9\_17} instance and recurs in many of the given instances. Furthermore, it should also be noted that in the case of \texttt{sdf} and \texttt{srf}, using the heuristics without optimisations performs worse than not using the heuristics at all. This suggests some kind of relationship between how the heuristics and optimisations complement or contrast each other. Perhaps the heuristics create a lot of equivalent or symmetrical nodes that optimisations can easily simplify, but over-complicates the search if not simplified.
 
 \subsection{Custom instances}
-To look into more detail at how the efficiency of the models are affected and how Savile Row works at finding solutions, some of the given instances have been modified and tested against the two models for performance. This allows us to more finely test what affects the efficiency of the model and isolate specific variables to change and test.
+To look into more detail at how the effort required of the models are affected, some of the given instances have been modified and tested against the two models for performance. This allows us to more finely test what affects the efficiency of the model and isolate specific variables to change and test.
+
 
 \subsubsection{Increasing number of steps}
-First we test the effect of changing the number of steps of a problems we looked at earlier. This gives us a comparison against earlier results. The number of steps is increased and not decreased as decreasing the number of steps will only lead to having no solution due to the nature of the game. We test this for both problems with solutions after increasing the number of steps, and problems with no solutions after. Examples of the latter would be grids that contain ice such that the avatar cannot move after pushing all blocks into goals, thereby causing no solution to be found. We use default settings here only on the improved model  as we want to focus our attention on the effect of the parameter files and not on other options which were already explored earlier. Further, new problems where there are no solutions regardless - such as if the blocks and goals were unreachable by the avatar - are also explored.
-
+First, a simple thing we can change is the number of steps for problems we looked at earlier. This gives us a comparison against earlier results. The number of steps is increased and not decreased as decreasing the number of steps will only lead to having no solution due to the nature of the game. We test this for both problems with solutions after increasing the number of steps, and problems with no solutions after. Examples of the latter would be grids that contain ice such that the avatar cannot move after pushing all blocks into goals, thereby causing no solution to be found. We use default settings here only on the improved model as we want to focus our attention on the effect of the parameter files and not on other options explored earlier. 
 
 \begin{figure}[H]
 \centering
@@ -846,7 +776,7 @@ First we test the effect of changing the number of steps of a problems we looked
 	ylabel={Number of solver nodes},
 	%ymode=log,
 	xlabel={Number of steps},
-	x label style={yshift=-0.5cm},
+	%x label style={yshift=-0.5cm},
 	symbolic x coords={6,7,8,9,10},
 	xtick=data,
 	%x tick label style={rotate=90, anchor=east},
@@ -871,8 +801,8 @@ coordinates {
 	ylabel={Number of solver nodes},
 	%ymode=log,
 	xlabel={Number of steps},
-	x label style={yshift=-0.5cm},
-	symbolic x coords={10,11,12,13,14,15},
+	%x label style={yshift=-0.5cm},
+	symbolic x coords={10,11,12,13,14,15,16},
 	%x tick label style={rotate=90, anchor=east},
 	ymajorgrids=true,
 	xmajorgrids=true,
@@ -884,7 +814,7 @@ coordinates {
 	legend image post style={xshift=-0.5em}	
 ]
 coordinates {
-(10,615) (12,3617) (14,23315)
+(10,615) (12,3617) (14,23315) (16,152245)
 };
 \addlegendentry{Solution}
 
@@ -900,13 +830,14 @@ coordinates {
 \end{axis}
 \end{tikzpicture}
 
-\caption{Number of nodes on the same problems but with varying number of steps required. Note that for problem 5, the number of steps determines whether there is a solution or not, while for problem 3, all instances have solutions.}
+\caption{Number of nodes on the same problems but with varying number of steps required. Note that for problem 5, the number of steps determines whether there is a solution or not as the avatar can move back and forth along his initial position with two extra steps, but not with just one extra step. For problem 3, all instances have solutions as the avatar can move freely after pushing all blocks into the goal.}
 \end{figure}
+\noindent
+It is interesting to see how the number of solver nodes increases with the number of steps even though there is still just one or no solution. This suggests that the number of steps is an independent factor in regards to the difficulty of a problem instance. It also doesn't seem to matter whether the increased steps led to a solution or not as the number of nodes increases regardless. Sequences of movement after the blocks are pushed into the goals for problem 3 should not increase the number of solver nodes, since any sequence of movement after the blocks are pushed is a valid solution and the solver would stop. This means the nodes must come from large numbers of backtracking combinations that are tried because more steps increases the number of these combinations. The increased work from a larger grid may also dwarf the work difference between problems with and without a solution. It is difficult to test the same problem instance both with and without a solution since the problem would be a different instance by definition, but we can certainly say the number of steps is a large factor in the difficulty of the Bombastic problem. 
 
-\subsubsection{No solutions}
 
 \subsubsection{Increasing cube problems}
-A custom instance that was created and tested was an $n \times n$ cube where the avatar always started at the top left, the goal is always at the bottom right and the one single block is always on the cell directly top left of the goal. The $n \times n$ here is the size of the live cells in the problem grid, not taking into account the ring of dead cells. These problems were created to isolate two variables. First is how the size of the grid affected the time and number of nodes to find a solution. The second is to find out how Savile Row and our B0mbastic model deals with problems with multiple solutions, since all the given problem instances only have one valid solution. 
+Something that we want to test is how a problem with multiple solutions would affect our model, especially when the \texttt{-all-solutions} flag is passed into Savile Row. A custom instance that was created and tested for this purpose was an $n \times n$ cube where the avatar always started at the top left, the goal is always at the bottom right and the one single block is always on the cell directly top left of the goal. The $n \times n$ here is the size of the live cells in the problem grid, not taking into account the ring of dead cells. 
 
 \begin{figure}[H]
 \centering
@@ -933,7 +864,7 @@ A custom instance that was created and tested was an $n \times n$ cube where the
 \caption{Examples of a $3 \times 3$ and $6 \times 6$ cube problem instance on the left and right respectively.}
 \end{figure}
 \noindent
-Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with the improved model. 
+Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with the improved model. This problem is used to test two different aspects of the model and solver. First is how the size of the grid affects the time and number of nodes to find a solution. This is different from the initial testing with the given parameter files as there is no increased complexity in the problem instance from elements such as ice blocks and multiple blocks. Only the size of the grid changes between cube problem instances. Secondly we can test the effect of multiple solutions to confirm the solver takes more time and nodes as there are more solutions to a problem instance.
 
 \begin{figure}[H]
 \centering
@@ -945,7 +876,7 @@ Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with t
 	ylabel={Number of solver nodes},
 	%ymode=log,
 	xlabel={Size of cube problem},
-	x label style={yshift=-0.5cm},
+	%x label style={yshift=-0.5cm},
 	xtick={1,2,3,4,5,6,7},
 	xticklabels={3,4,5,6,7,8,9},
 	ymajorgrids=true,
@@ -983,7 +914,7 @@ Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with t
 	ylabel={Time taken in seconds},
 	%ymode=log,
 	xlabel={Size of cube problem},
-	x label style={yshift=-0.5cm},
+	%x label style={yshift=-0.5cm},
 	xtick={1,2,3,4,5,6,7},
 	xticklabels={3,4,5,6,7,8,9},
 	ymajorgrids=true,
@@ -1012,8 +943,11 @@ Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with t
 \end{axis}
 \end{tikzpicture}
 \end{minipage}
-\caption{Results of running all cube problems}
+\caption{Results of running all cube problems without the \texttt{-all-solutions} flag.}
+\label{fig:cube-one}
 \end{figure}
+\noindent
+We can see that as the size of the grid increases, the number of solver nodes searched increases exponentially. This makes sense as the size of the grid and number of steps has increased, there is a larger search space with more possible moves to search through. What is interesting is that the time taken is significantly improved by the optimisations while the number of solver nodes is not. This is similar to the pattern observed in section \ref{sec:optimisation} but to a greater effect. TODO
 
 \begin{figure}[H]
 \centering
@@ -1023,7 +957,7 @@ Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with t
 	title={\textbf{Number of solver nodes}},
 	%ybar,
 	ylabel={Number of solver nodes},
-	%ymode=log,
+	ymode=log,
 	xlabel={Size of cube problem},
 	x label style={yshift=-0.5cm},
 	xtick={1,2,3,4,5,6,7},
@@ -1035,19 +969,19 @@ Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with t
 	]
 
 \addplot+[mark=*] coordinates {
-(1,26) (2,91) (3,202) (4,569) (5,1007) (6,1961) (7,3111) };
+(1,41) (2,334) (3,2231) (4,19480) (5,99842) (6,571479) (7,2756393)};
 \addlegendentry{-O0}
 
 \addplot+[mark=*] coordinates {
-(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)};
+(1,41) (2,334) (3,1685) (4,18290) (5,91490) (6,571479) (7,2721358)};
 \addlegendentry{-O1}
 
 \addplot+[mark=*] coordinates {
-(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)};
+(1,41) (2,334) (3,1685) (4,18290) (5,91490) (6,571479) (7,2721358)};
 \addlegendentry{-O2}
 
 \addplot+[mark=*] coordinates {
-(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)};
+(1,41) (2,334) (3,1685) (4,18290) (5,91490) (6,571479) (7,2721358)};
 \addlegendentry{-O3}
 
 \end{axis}
@@ -1061,7 +995,7 @@ Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with t
 	title={\textbf{Time taken}},
 	%ybar,
 	ylabel={Time taken in seconds},
-	%ymode=log,
+	ymode=log,
 	xlabel={Size of cube problem},
 	x label style={yshift=-0.5cm},
 	xtick={1,2,3,4,5,6,7},
@@ -1073,31 +1007,150 @@ Cube problem sizes from $3 \times 3$ to $9 \times 9$ were created and run with t
 	]
 
 \addplot+[mark=*] coordinates {
-(1,0.036699) (2,0.048209) (3,0.073289) (4,0.105752) (5,0.213041) (6,0.385509) (7,0.691582) 
+(1,0.007149) (2,0.019477) (3,0.064929) (4,0.383109) (5,1.91445) (6,12.8314) (7,68.0679)
 };
 \addlegendentry{-O0}
 
 \addplot+[mark=*] coordinates {
-(1,0.034287) (2,0.037479) (3,0.040116) (4,0.043055) (5,0.051263) (6,0.063065) (7,0.080922) };
+(1,0.001486) (2,0.006518) (3,0.018368) (4,0.123967) (5,0.576449) (6,3.74547) (7,17.9922) };
 \addlegendentry{-O1}
 
 \addplot+[mark=*] coordinates {
-(1,0.034397) (2,0.035583) (3,0.03793) (4,0.042398) (5,0.045988) (6,0.058425) (7,0.06942)};
+(1,0.001634) (2,0.004154) (3,0.014428) (4,0.12099) (5,0.59102) (6,3.66499) (7,17.3433)};
 \addlegendentry{-O2}
 
 \addplot+[mark=*] coordinates {
-(1,0.035515) (2,0.037177) (3,0.03824) (4,0.04338) (5,0.048467) (6,0.057125) (7,0.069001)};
+(1,0.001369) (2,0.004841) (3,0.015021) (4,0.122008) (5,0.569325) (6,3.74015) (7,17.6333)};
 \addlegendentry{-O3}
 
 \end{axis}
 \end{tikzpicture}
 \end{minipage}
-\caption{Results of running all cube problems}
+\caption{Results of running all cube problems finding all solutions. The y-axis is plot as a log axis to more clearly see the relation of the data.}
+\label{fig:cube-all}
 \end{figure}
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.85]
+\begin{axis}[
+	title={\textbf{Number of solver solutions found}},
+	%ybar,
+	ylabel={Number of solutions},
+	%ymode=log,
+	xlabel={Size of cube problem},
+	x label style={yshift=-0.5cm},
+	xtick={1,2,3,4,5,6,7},
+	xticklabels={3,4,5,6,7,8,9},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	%legend pos=north west,
+	%cycle list name=color list,
+	]
 
-\section{Conclusion and evaluation}
+\addplot+[mark=*] coordinates {
+(1,2) (2,6) (3,20) (4,70) (5,252) (6,924) (7,3432)
+};
 
+\end{axis}
+\end{tikzpicture}
+\caption{Number of solutions found for each cube problem instance.}
+\end{figure}
+\noindent
+Another good result we get is time and nodes searched to find all solutions is much more than just finding one solution. Though this should be obvious, it is a good result to show empirically, showing that the constraint solver will stop at the first solution found without any further searching by default.
+\n
+Again the same pattern of improving time with optimisations without improving the number of nodes applies when finding all solutions as well. The log graph of figure \ref{fig:cube-all} quite clearly shows no optimisations is worse for every sized cube problem instance. However, it is difficult to determine if this pattern is due solely to the increasing complexity from the size of the grid, as the number of steps had to be increased as well and it is already shown that the number of steps is an important factor where more steps requires more effort to solve.
+
+\subsubsection{Cube with ice}
+To determine whether the number of steps is the sole factor determining the effort required, we can change our cube problems to contain ice cells instead of normal cells. The number of steps stays constant for each cube problem, but all normal cells are replaced with ice cells. This does not affect the solution as all solutions with the given number of steps do not require walking back over any previously visited cell. In other words, it is valid to change all cells to ice without losing any solutions.
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.45]
+\begin{axis}[
+	title={{\large \textbf{Comparison with solver nodes}}},
+	ybar,
+	bar width=1em,
+	width=12cm,
+	ylabel={{\large Number of solver nodes}},
+	ymin=0,
+	%ymode=log,
+	xlabel={{\large Size of cube problem}},
+	xtick={1,2,3,4,5,6,7},
+	xticklabels={3,4,5,6,7,8,9},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+	%cycle list name=color list,
+	]
+
+\addplot
+coordinates {
+(1,26) (2,91) (3,180) (4,552) (5,971) (6,1961) (7,3091)
+};
+\addlegendentry{{\large No ice cells}}
+
+\addplot
+coordinates {
+(1,4) (2,28) (3,56) (4,90) (5,130) (6,176) (7,228)
+};
+\addlegendentry{{\large All ice cells}}
+
+\end{axis}
+
+\end{tikzpicture}
+\end{minipage}
+\hspace{0.5cm}
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=0.45]
+\begin{axis}[
+	title={{\large \textbf{Comparison with time taken}}},
+	ybar,
+	bar width=1em,
+	width=12cm,
+	ylabel={{\large Time taken in seconds}},
+	y label style={yshift=0.5cm},
+	%ymode=log,
+	xlabel={{\large Size of cube problem}},
+	xtick={1,2,3,4,5,6,7},
+	xticklabels={3,4,5,6,7,8,9},
+	ymajorgrids=true,
+	xmajorgrids=true,
+	legend pos=north west,
+	%cycle list name=color list,
+	]
+
+\addplot
+coordinates {
+(1,0.035515) (2,0.037177) (3,0.03824) (4,0.04338) (5,0.048467) (6,0.057125) (7,0.069001)
+};
+\addlegendentry{{\large No ice cells}}
+
+\addplot
+coordinates {
+(1,0.035332) (2,0.049489) (3,0.044164) (4,0.057221) (5,0.07685) (6,0.101592) (7,0.155829)
+};
+\addlegendentry{{\large All ice cells}}
+
+\end{axis}
+
+\end{tikzpicture}
+\end{minipage}
+\caption{Comparison of the same cube problems with same steps but cells are either all normal or all ice.}
+\label{fig:cube-ice}
+\end{figure}
+\noindent
+Having the problem instances change to contain all ice cells dramatically decreases the number of solver nodes searched. The rest of the instance stays exactly the same, including the number of steps. This is interesting as it shows the ice creates less nodes to search through as it prevents any nodes with backtracking because it is not allowed to walk back from the ice. However, the time taken tells an opposite story. The problem instances with ice take \textit{more} time to solve even though there are many less nodes being searched. This shows the effort by the solver isn't just on searching through the nodes to find a solution, but also includes processing time to go through the constraints to get the nodes in the first place. Having all ice cells complicates the instance in that every move causes changes to the grid and therefore required more time. 
+\n
+From this, we can also say that the number of steps is not the only factor. The complexity of the instance changes the effort taken by the solver and model. A more complicated problem contains less search because it is more constrained by the model, but still takes time and effort as more constraints have to be processed. More steps does seem to be a large contributing factor, as figure \ref{fig:cube-ice} still shows a larger grid - which requires more steps to solve - takes more work, but there are other factors like the ice cells which changes the efficiency in which the model can find solutions.
+
+
+\section{Conclusion}
+In conclusion, two models with different constraints were developed and tested against various Bombastic problem instances. The second model attempted to improve on the first by simplifying complicated constraints to be more precise. The differences between the models are shown by their performance on the given problem instances. Additionally, the solver options of Savile Row such as optimisation flags and heuristics were also explored to see their effect on the two models. Finally, custom instances were created to isolate and test how specific elements increased the difficulty of the Bombastic problem and affected the performance of our constraints model.
+\n
+The optimisation flags and heuristics both had strong effects on the model, maybe to eliminate solver nodes and decrease the time taken by the model. The two seem to be able to work in tandem, producing good results if both are used. Nevertheless, using heuristics blindly without understanding how they work can have a negative impact on performance.
+\n
+Furthermore, it was found that the number of steps had a large impact on the effort required to solve the problem, as it led to more solver nodes and more time taken, even if the rest of the problem instance stays the same. However, it was also shown that there are other factors such as complexity of the instance that contribute to how well the model can solve a given instance.
 
 \include{Appendix}
 
