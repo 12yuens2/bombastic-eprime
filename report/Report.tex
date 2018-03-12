@@ -189,12 +189,12 @@ forall step : int(0..steps) .
 	    blocksCurrentRow[step, checkBlock] != blocksCurrentRow[step, otherBlock] \/
 		blocksCurrentCol[step, checkBlock] != blocksCurrentCol[step, otherBlock],
 \end{lstlisting}
-All these constraints are quite similar and simply deal with not allowing the avatar or any blocks to share position or be in dead cells. An \vee\  is used instead of an \wedge\ to convey the constraint, though they are equivalent to one another by DeMorgan's Law:
+All these constraints are quite similar and simply deal with not allowing the avatar or any blocks to share position or be in dead cells. An $\vee$ is used instead of an $\wedge$ to convey the constraint, though they are equivalent to one another by DeMorgan's Law:
 \begin{equation}
-\texttt{!(avatarCurrentRow[step] = row \wedge\ avatarCurrentCol[step] = col)}
+\texttt{!(avatarCurrentRow[step] = row $\wedge$ avatarCurrentCol[step] = col)}
 \end{equation}
 \begin{equation}
-\texttt{avatarCurrentRow[step] != row \vee\ avatarCurrentCol[step] != col\ }
+\texttt{avatarCurrentRow[step] != row $\vee$ avatarCurrentCol[step] != col\ }
 \end{equation}
 \noindent
 These constraints look rather inefficient from the number of nested loops required. We shall we later in section \ref{sec:improve-row} how we can improve this. Additionally, the results found in section \ref{sec:results} show the difference in performance between the initial and improved constraints.
